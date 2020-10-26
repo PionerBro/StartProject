@@ -1,11 +1,9 @@
-#include "menu.h"
-
+#include "mainmenu.h"
 
 #include <QPushButton>
 #include <QVBoxLayout>
 
-
-Menu::Menu(QWidget* parent):QWidget(parent)
+MainMenu::MainMenu(QWidget *parent) : QWidget(parent)
 {
     QPushButton* btnPlay = new QPushButton("Начать упражнения");
     btnPlay->setMinimumSize(300,40);
@@ -13,7 +11,7 @@ Menu::Menu(QWidget* parent):QWidget(parent)
 
     QPushButton* btnAddWords = new QPushButton("Добавить слова");
     btnAddWords->setMinimumSize(300,40);
-    //connect(btnAddWords, SIGNAL(clicked()), SLOT());
+    connect(btnAddWords, SIGNAL(clicked()), SLOT(toAddWords()));
 
     QPushButton* btnSettings = new QPushButton("Настройки");
     btnSettings->setMinimumSize(300,40);
@@ -33,3 +31,9 @@ Menu::Menu(QWidget* parent):QWidget(parent)
 
     setLayout(bxLayout);
 }
+
+void MainMenu::toAddWords(){
+    emit crAddWords();
+}
+
+

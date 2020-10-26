@@ -10,8 +10,8 @@
 #include <QTextStream>
 #include <QMessageBox>
 
-#define PASSWORDFILE "D:\\Qt Projects\\password.txt"
-#define LOGINFILE "D:\\Qt Projects\\login.txt"
+#define PASSWORDFILE "password.txt"
+#define LOGINFILE "login.txt"
 
 Registration::Registration(QWidget* parent):QWidget(parent)
 {

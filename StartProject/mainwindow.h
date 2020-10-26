@@ -22,6 +22,7 @@ private:
 private slots:
     void createWelcomePage();
     void createMainApp();
+    void createAddWordsPage();
    // void createRegApp();
 };
 #endif // MAINWINDOW_H

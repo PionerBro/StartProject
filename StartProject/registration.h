@@ -20,7 +20,7 @@ public:
 signals:
     void returntoWelcomePage();
     void regErorrSignal(const QString&);
-public slots:
+private slots:
     void retPage();
     void createUser();
 };
