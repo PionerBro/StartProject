@@ -73,7 +73,8 @@ void AddWords::addWords(){
     outrf<<russtr<<"\n";
 
     plblInfo->setText("Слова успешно добавлены");
-
+    plneEngWord->clear();
+    plneRusWord->clear();
     ef.close();
     rf.close();
 }

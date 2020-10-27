@@ -14,6 +14,7 @@ SOURCES += \
     mainmenu.cpp \
     mainwindow.cpp \
     registration.cpp \
+    start.cpp \
     welcomepage.cpp
 
 HEADERS += \
@@ -21,6 +22,7 @@ HEADERS += \
     mainmenu.h \
     mainwindow.h \
     registration.h \
+    start.h \
     welcomepage.h
 
 # Default rules for deployment.

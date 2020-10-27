@@ -7,7 +7,7 @@ MainMenu::MainMenu(QWidget *parent) : QWidget(parent)
 {
     QPushButton* btnPlay = new QPushButton("Начать упражнения");
     btnPlay->setMinimumSize(300,40);
-    //connect(btnPlay, SIGNAL(clicked()), SLOT());
+    connect(btnPlay, SIGNAL(clicked()), SLOT(toStartPage()));
 
     QPushButton* btnAddWords = new QPushButton("Добавить слова");
     btnAddWords->setMinimumSize(300,40);
@@ -36,4 +36,6 @@ void MainMenu::toAddWords(){
     emit crAddWords();
 }
 
-
+void MainMenu::toStartPage(){
+    emit crStartPage();
+}

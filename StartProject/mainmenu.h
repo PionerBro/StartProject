@@ -10,8 +10,10 @@ public:
     MainMenu(QWidget *parent = 0);
 signals:
     void crAddWords();
+    void crStartPage();
 private slots:
     void toAddWords();
+    void toStartPage();
 
 };
 

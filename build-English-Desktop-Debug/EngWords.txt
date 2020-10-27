@@ -1,0 +1,14 @@
+Hello
+Bye
+Box
+Door
+Pen
+Mouse
+Bottle
+Phone
+Bus
+Car
+Boy
+Girl
+Home
+Stadium
