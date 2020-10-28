@@ -10,19 +10,26 @@
 #define ENGWORDS "EngWords.txt"
 #define RUSWORDS "RusWords.txt"
 
-Start::Start(QWidget *parent, int num) : QWidget(parent), m_num(num)
+Start::Start(QString id, QWidget *parent) : QWidget(parent), m_id(id)
 {
     plblEng = new QLabel;
     plblRus = new QLabel;
+
+
     QFile fe(ENGWORDS);
     QFile fr(RUSWORDS);
+    QFile fs(m_id + ".txt");
     if(!fe.open(QIODevice::ReadOnly | QIODevice::Text)
-            || !fr.open(QIODevice::ReadOnly | QIODevice::Text)){
-        QMessageBox::information(0, "Erorr", "Отсутсвует файлы: EngWords.txt или RusWords.txt");
+            || !fr.open(QIODevice::ReadOnly | QIODevice::Text)
+            || !fs.open(QIODevice::ReadOnly | QIODevice::Text)){
+        QMessageBox::information(0, "Erorr", "Отсутсвует файлы: EngWords.txt или RusWords.txt или Файл настроек" + m_id);
         exit(1);
     }
+
+    QTextStream sin(&fs);
     QTextStream ein(&fe);
     QTextStream rin(&fr);
+    pos = m_num = (sin.readLine()).toInt();
     int count;
     for (count = 0; count < m_num; ++count) {
         ein.readLine();
@@ -42,6 +49,7 @@ Start::Start(QWidget *parent, int num) : QWidget(parent), m_num(num)
     plblRus->setText(strR);
     fe.close();
     fr.close();
+    fs.close();
 
     QHBoxLayout* hbxLabel = new QHBoxLayout;
     hbxLabel->addWidget(plblEng);
@@ -69,6 +77,7 @@ Start::Start(QWidget *parent, int num) : QWidget(parent), m_num(num)
     vbx->addLayout(hbxBut2);
 
     setLayout(vbx);
+
 }
 
 void Start::prevPage(){
@@ -114,6 +123,16 @@ void Start::nextPage(){
         return;
     }
     m_num += p_num;
+    if(m_num > pos){
+        QFile fs(m_id + ".txt");
+        if(!fs.open(QIODevice::WriteOnly | QIODevice::Text)){
+            QMessageBox::information(0, "Erorr", "Ошибка открытия файла");
+            exit(1);
+        }
+        QTextStream outs(&fs);
+        outs<<m_num;
+        pos = m_num;
+    }
     QFile fe(ENGWORDS);
     QFile fr(RUSWORDS);
     if(!fe.open(QIODevice::ReadOnly | QIODevice::Text)
@@ -142,6 +161,7 @@ void Start::nextPage(){
     plblRus->setText(strR);
     fe.close();
     fr.close();
+
 }
 
 void Start::toMenu(){

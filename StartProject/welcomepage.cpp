@@ -11,10 +11,11 @@
 #include <QTextStream>
 #include <QMessageBox>
 
+
 #define PASSWORDFILE "password.txt"
 #define LOGINFILE "login.txt"
 
-WelcomePage::WelcomePage(QWidget* parent):QWidget(parent)
+WelcomePage::WelcomePage(QWidget* parent): QWidget(parent)
 {
     QLabel* plblName = new QLabel("&Имя:");
     plneName = new QLineEdit;
@@ -56,15 +57,16 @@ WelcomePage::WelcomePage(QWidget* parent):QWidget(parent)
 
 void WelcomePage::userChecked(){
     QFile f(LOGINFILE);
-    if(!f.open(QIODevice::ReadOnly)){
+    if(!f.open(QIODevice::ReadOnly | QIODevice::Text)){
         QMessageBox::information(0, "Ошибка", "Ошибка открытия файла");
         exit(1);
     }
     QTextStream in(&f);
+    QString strr = plneName->text();
     for (int pos = 0; !in.atEnd(); ++pos) {
-        if(!in.readLine().compare(plneName->text())){
+        if(!in.readLine().compare(strr)){
             QFile fp(PASSWORDFILE);
-            if(!fp.open(QIODevice::ReadOnly)){
+            if(!fp.open(QIODevice::ReadOnly | QIODevice::Text)){
                 QMessageBox::information(0, "Ошибка", "Ошибка открытия файла");
                 exit(1);
             }
@@ -73,6 +75,7 @@ void WelcomePage::userChecked(){
                 inPass.readLine();
             }
             if(!inPass.readLine().compare(plnePass->text())){
+                emit setId(strr);
                 emit crMainApp();
                 return;
             }

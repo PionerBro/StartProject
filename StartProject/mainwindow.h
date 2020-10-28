@@ -5,25 +5,31 @@
 #include <QPushButton>
 
 class WelcomePage;
-class Menu;
+class MainMenu;
 class Registration;
+class Start;
+class AddWords;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-
-
+    MainWindow(QWidget *parent = 0);
 private:
-    QWidget* wgt;
-
+    //QWidget* wgt;
+    QString m_id;
+    WelcomePage* wlcm;
+    MainMenu* mnmu;
+    AddWords* adws;
+    Start* strt;
 private slots:
     void createWelcomePage();
     void createMainApp();
     void createAddWordsPage();
     void createExercisePage();
-   // void createRegApp();
+    void createMainAppAdd();
+    void createMainAppEx();
+    void addId(QString&);
 };
 #endif // MAINWINDOW_H

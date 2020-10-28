@@ -5,54 +5,73 @@
 #include "addwords.h"
 #include <QApplication>
 #include "start.h"
+#include <QLabel>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+
     createWelcomePage();
-
-
 }
 
 void MainWindow::createWelcomePage(){
-    QWidget* tmp = new WelcomePage;
-    connect(tmp, SIGNAL(crMainApp()), SLOT(createMainApp()));
-    tmp->show();
-    delete wgt;
-    wgt = tmp;
+    wlcm = new WelcomePage;
+    connect(wlcm, SIGNAL(crMainApp()), SLOT(createMainApp()));
+    connect(wlcm, SIGNAL(setId(QString&)), SLOT(addId(QString&)));
+    wlcm->show();
+    //delete wgt;
+    //wgt = tmp;
 }
 
 void MainWindow::createMainApp(){
-    QWidget* tmp = new MainMenu;
-    connect(tmp, SIGNAL(crAddWords()), SLOT(createAddWordsPage()));
-    connect(tmp, SIGNAL(crStartPage()), SLOT(createExercisePage()));
-    tmp->show();
+    mnmu = new MainMenu;
+    connect(mnmu, SIGNAL(crAddWords()), SLOT(createAddWordsPage()));
+    connect(mnmu, SIGNAL(crStartPage()), SLOT(createExercisePage()));
+    mnmu->show();
+    delete wlcm;
     //wgt->hide();
-    delete wgt;
-    wgt = tmp;
+    //delete wgt;
+    //wgt = tmp;
 }
 
 void MainWindow::createAddWordsPage(){
-    QWidget* tmp = new AddWords;
-    connect(tmp, SIGNAL(returnToMenu()), SLOT(createMainApp()));
-    tmp->show();
-    delete wgt;
-    wgt = tmp;
+    adws = new AddWords;
+    connect(adws, SIGNAL(returnToMenu()), SLOT(createMainAppAdd()));
+    adws->show();
+    delete mnmu;
+
+    //delete wgt;
+    //wgt = tmp;
 }
 
 void MainWindow::createExercisePage(){
-    QWidget* tmp = new Start;
-    connect(tmp, SIGNAL(crMainMenu()), SLOT(createMainApp()));
-    tmp->show();
-    delete wgt;
-    wgt = tmp;
+    strt = new Start(m_id);
+    connect(strt, SIGNAL(crMainMenu()), SLOT(createMainAppEx()));
+    strt->show();
+    delete mnmu;
+    //delete wgt;
+    //wgt = tmp;
 }
 
-/*void MainWindow::createRegApp(){
-    QWidget* regbtn = new QPushButton("Quit");
-    regbtn->setAttribute(Qt::WA_DeleteOnClose);
-    connect(regbtn, SIGNAL(clicked()), regbtn, SLOT(close()));
-    regbtn->show();
-    wgt->hide();    
+void MainWindow::createMainAppAdd(){
+    //mnmu = new MainMenu;
+    //connect(mnmu, SIGNAL(crAddWords()), SLOT(createAddWordsPage()));
+    //connect(mnmu, SIGNAL(crStartPage()), SLOT(createExercisePage()));
+    //mnmu->show();
+    QLabel* plbl = new QLabel(m_id);
+    plbl->show();
+    delete adws;
+}
 
-}*/
+void MainWindow::createMainAppEx(){
+    mnmu = new MainMenu;
+    connect(mnmu, SIGNAL(crAddWords()), SLOT(createAddWordsPage()));
+    connect(mnmu, SIGNAL(crStartPage()), SLOT(createExercisePage()));
+    mnmu->show();
+    delete strt;
+}
+void MainWindow::addId(QString& str){
+    m_id = str;
+}
+

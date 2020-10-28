@@ -104,8 +104,6 @@ void Registration::createUser(){
     out<<login<<"\n";
     f.close();
 
-
-
     f.setFileName(PASSWORDFILE);
     if(!f.open(QIODevice::Append | QIODevice::Text)){
         plblWarning->setText("ошибка открытия файла");
@@ -113,6 +111,15 @@ void Registration::createUser(){
     }
     out<<password<<"\n";
     f.close();
+
+    f.setFileName(login+".txt");
+    if(!f.open(QIODevice::WriteOnly | QIODevice::Text)){
+        plblWarning->setText("ошибка открытия файла");
+        return;
+    }
+    out<<0<<"\n";
+    f.close();
+
 
     QMessageBox::information(0, "Information", "Аккаунт успешно зарегистрирован");
     emit returntoWelcomePage();

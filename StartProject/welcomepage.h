@@ -11,10 +11,11 @@ class WelcomePage:public QWidget
     Q_OBJECT
 public:
     WelcomePage(QWidget* parent = 0);
+
 signals:
     void crMainApp();
     void retPage();
-    //void crRegApp();
+    void setId(QString&);
 
 private slots:
     void userChecked();

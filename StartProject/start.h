@@ -9,8 +9,10 @@ class Start : public QWidget
 {
     Q_OBJECT
 public:
-    Start(QWidget *parent = 0, int num = 0);
+    Start(QString id, QWidget *parent = 0);
 private:
+    QString m_id;
+    int pos;
     int p_num;
     int m_num;
     QLabel* plblEng;
