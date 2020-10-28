@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class QLabel;
+class Work;
 
 class Start : public QWidget
 {
@@ -17,12 +18,15 @@ private:
     int m_num;
     QLabel* plblEng;
     QLabel* plblRus;
+    Work* work;
 signals:
     void crMainMenu();
 private slots:
     void prevPage();
     void nextPage();
     void toMenu();
+    void createWorkPage();
+    void deleteWorkPage();
 };
 
 #endif // START_H

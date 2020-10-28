@@ -15,7 +15,8 @@ SOURCES += \
     mainwindow.cpp \
     registration.cpp \
     start.cpp \
-    welcomepage.cpp
+    welcomepage.cpp \
+    work.cpp
 
 HEADERS += \
     addwords.h \
@@ -23,7 +24,8 @@ HEADERS += \
     mainwindow.h \
     registration.h \
     start.h \
-    welcomepage.h
+    welcomepage.h \
+    work.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

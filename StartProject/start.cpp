@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
+#include <work.h>
 
 #define ENGWORDS "EngWords.txt"
 #define RUSWORDS "RusWords.txt"
@@ -22,7 +23,7 @@ Start::Start(QString id, QWidget *parent) : QWidget(parent), m_id(id)
     if(!fe.open(QIODevice::ReadOnly | QIODevice::Text)
             || !fr.open(QIODevice::ReadOnly | QIODevice::Text)
             || !fs.open(QIODevice::ReadOnly | QIODevice::Text)){
-        QMessageBox::information(0, "Erorr", "Отсутсвует файлы: EngWords.txt или RusWords.txt или Файл настроек" + m_id);
+        QMessageBox::information(0, "Erorr", "Отсутсвует файлы: EngWords.txt или RusWords.txt или Файл настроек");
         exit(1);
     }
 
@@ -64,7 +65,7 @@ Start::Start(QString id, QWidget *parent) : QWidget(parent), m_id(id)
     hbxBut1->addWidget(btnNext);
 
     QPushButton* btnExercise = new QPushButton("Практика");
-
+    connect(btnExercise, SIGNAL(clicked()), SLOT(createWorkPage()));
     QPushButton* btnCancel = new QPushButton("Меню");
     connect(btnCancel, SIGNAL(clicked()), SLOT(toMenu()));
     QHBoxLayout* hbxBut2 = new QHBoxLayout;
@@ -166,4 +167,20 @@ void Start::nextPage(){
 
 void Start::toMenu(){
     emit crMainMenu();
+}
+
+void Start::createWorkPage(){
+    if(pos == 0){
+        QMessageBox::information(0, "information", "Вы не выучили ни одного слова");
+        return;
+    }
+    work = new Work(pos);
+    connect(work, SIGNAL(btStart()), SLOT(deleteWorkPage()));
+    work->show();
+    hide();
+}
+
+void Start::deleteWorkPage(){
+    delete work;
+    show();
 }

@@ -6,6 +6,7 @@
 #include <QApplication>
 #include "start.h"
 #include <QLabel>
+#include <work.h>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -55,12 +56,10 @@ void MainWindow::createExercisePage(){
 }
 
 void MainWindow::createMainAppAdd(){
-    //mnmu = new MainMenu;
-    //connect(mnmu, SIGNAL(crAddWords()), SLOT(createAddWordsPage()));
-    //connect(mnmu, SIGNAL(crStartPage()), SLOT(createExercisePage()));
-    //mnmu->show();
-    QLabel* plbl = new QLabel(m_id);
-    plbl->show();
+    mnmu = new MainMenu;
+    connect(mnmu, SIGNAL(crAddWords()), SLOT(createAddWordsPage()));
+    connect(mnmu, SIGNAL(crStartPage()), SLOT(createExercisePage()));
+    mnmu->show();
     delete adws;
 }
 
