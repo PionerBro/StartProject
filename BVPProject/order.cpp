@@ -1,4 +1,5 @@
 #include "order.h"
+#include "itemtable.h"
 #include <QWidget>
 #include <QTableWidget>
 #include <QLineEdit>
@@ -11,14 +12,17 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QTableWidgetItem>
+#include <QHeaderView>
 
 Order::Order(QWidget *parent) : QWidget(parent)
 {
-    QLabel* lbl_number = new QLabel("Номер:", this);
+    //setAttribute(Qt::WA_DeleteOnClose);
+    QLabel* lbl_number = new QLabel(tr("Номер:"), this);
     lbl_number->setMaximumSize(50,25);
     lne_number = new QLineEdit(this);
     lne_number->setMaximumSize(75,25);
     date = new QDateTimeEdit(this);
+    date->setDisplayFormat("dd.MM.yyyy");
     date->setCalendarPopup(true);
     date->setMaximumSize(150,25);
     date->setDateTime(QDateTime::currentDateTime());
@@ -28,7 +32,7 @@ Order::Order(QWidget *parent) : QWidget(parent)
     hbx_date->addWidget(lne_number);
     hbx_date->addWidget(date);
 
-    QLabel* lbl_name = new QLabel("Ф.И.О:", this);
+    QLabel* lbl_name = new QLabel(tr("Ф.И.О:"), this);
     lbl_name->setMaximumSize(75,25);
     lbl_name->setAlignment(Qt::AlignRight);
     lne_name = new QLineEdit(this);
@@ -38,12 +42,12 @@ Order::Order(QWidget *parent) : QWidget(parent)
     hbx_name->addWidget(lbl_name);
     hbx_name->addWidget(lne_name);
 
-    QLabel* lbl_source = new QLabel("Оформил:", this);
+    QLabel* lbl_source = new QLabel(tr("Оформил:"), this);
     lbl_source->setMaximumSize(75,25);
     lbl_source->setAlignment(Qt::AlignRight);
     list_source = new QComboBox(this);
     QStringList str_source;
-    str_source<<"Лельчицы"<<"Мозырь"<<"Гомель"<<"Калинковичи";
+    str_source<<tr("Лельчицы")<<tr("Мозырь")<<tr("Гомель")<<tr("Калинковичи");
     list_source->addItems(str_source);
     list_source->setMaximumSize(250,25);
     QHBoxLayout* hbx_source = new QHBoxLayout;
@@ -51,7 +55,7 @@ Order::Order(QWidget *parent) : QWidget(parent)
     hbx_source->addWidget(lbl_source);
     hbx_source->addWidget(list_source);
 
-    QLabel* lbl_destination = new QLabel("Доставка:", this);
+    QLabel* lbl_destination = new QLabel(tr("Доставка:"), this);
     lbl_destination->setMaximumSize(75,25);
     lbl_destination->setAlignment(Qt::AlignRight);
     lne_destination = new QLineEdit(this);
@@ -61,26 +65,17 @@ Order::Order(QWidget *parent) : QWidget(parent)
     hbx_destination->addWidget(lbl_destination);
     hbx_destination->addWidget(lne_destination);
 
-    table = new QTableWidget(t_row, t_col, this);
-    QStringList table_str;
-    table_str << "Наименование" << "Хар-ки" << "Ед.изм." << "Кол-во" << "Цена" << "Сумма" << "Выполнено";
-    table->setHorizontalHeaderLabels(table_str);
-    QTableWidgetItem* it = 0;
-    for(int i = 0; i<t_row; ++i){
-        for(int j = 0; j<t_col; ++j){
-            it = new QTableWidgetItem;
-            it->setText("");
-            table->setItem(i,j,it);
-        }
-    }
+    createTable();
+
+
     QHBoxLayout* hbx_table = new QHBoxLayout;
     hbx_table->addWidget(table);
 
-    btn_ok = new QPushButton("&Принять", this);
+    btn_ok = new QPushButton(tr("Принять"), this);
     connect(btn_ok, SIGNAL(clicked()), SLOT(slotOkClicked()));
-    btn_close = new QPushButton("&Закрыть", this);
+    btn_close = new QPushButton(tr("Закрыть"), this);
     connect(btn_close, SIGNAL(clicked()), SLOT(close()));
-    setAttribute(Qt::WA_DeleteOnClose);
+
     QHBoxLayout* hbx_btn = new QHBoxLayout;
     hbx_btn->setAlignment(Qt::AlignCenter);
     hbx_btn->addWidget(btn_ok);
@@ -102,9 +97,68 @@ void Order::slotOkClicked(){
         sum += table->item(i, 5)->text().toDouble();
     }
 
-    list << date->date().toString("dd.MM.yy") << lne_number->text() << lne_name->text() << lne_destination->text() << list_source->currentText() << QString::number(sum);
+    //list << date->date().toString("dd.MM.yy") << lne_number->text() << lne_name->text() << lne_destination->text() << list_source->currentText() << QString::number(sum);
     QMessageBox::information(0,"r", QString().setNum(sum));
-    emit signalNewDoc(list);
-    close();
+    //emit signalNewDoc(list);
+    this->close();
 }
+
+void Order::createTable(){
+    table = new QTableWidget(t_row, t_col, this);
+    QStringList table_str;
+    table_str << tr("Наименование") << tr("Хар-ки") << tr("Ед.изм.") << tr("Кол-во") << tr("Цена") << tr("Сумма") << tr("Выполнено");
+    table->setHorizontalHeaderLabels(table_str);
+    table->horizontalHeader()->setStretchLastSection(true);
+    QTableWidgetItem* it = 0;
+    for(int i = 0; i<t_row; ++i){
+        QWidget* tableWgt = new QWidget(this);
+        QPushButton* tableBtn = new QPushButton(".", tableWgt);
+        connect(tableBtn, SIGNAL(clicked()), this, SLOT(selectName()));
+        tableBtn->setFixedSize(10,10);
+        QLabel* tableLbl = new QLabel(tableWgt);
+        QHBoxLayout* tablehbx = new QHBoxLayout(tableWgt);
+        table->setContentsMargins(0,0,0,0);
+        tablehbx->addWidget(tableLbl);
+        tablehbx->addWidget(tableBtn, Qt::AlignRight);
+        table->setCellWidget(i, 0, tableWgt);
+        for(int j = 1; j<t_col; ++j){
+            it = new QTableWidgetItem;
+            it->setText("");
+            table->setItem(i,j,it);
+        }
+    }
+}
+
+void Order::selectName(){
+    QStringList data;
+    ItemTable* itemTable = new ItemTable(data,this);
+    if(itemTable->exec()){
+        QWidget* tableWgt = new QWidget(this);
+        QPushButton* tableBtn = new QPushButton(".", tableWgt);
+        connect(tableBtn, SIGNAL(clicked()), this, SLOT(selectName()));
+        tableBtn->setFixedSize(10,10);
+        QLabel* tableLbl = new QLabel(data[0]+ " " + data[1], tableWgt);
+        QHBoxLayout* tablehbx = new QHBoxLayout(tableWgt);
+        table->setContentsMargins(0,0,0,0);
+        tablehbx->addWidget(tableLbl);
+        tablehbx->addWidget(tableBtn, Qt::AlignRight);
+        table->setCellWidget(row,0, tableWgt);
+        table->item(row, 2)->setText(data[2]);
+        table->item(row, 4)->setText(data[3]);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
