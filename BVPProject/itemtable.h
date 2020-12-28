@@ -7,6 +7,7 @@ class ItemTableDatabase;
 class QSqlTableModel;
 class QTableView;
 
+
 class ItemTable : public QDialog
 {
     Q_OBJECT
@@ -25,6 +26,7 @@ private slots:
     void editItem();
     void deleteItem();   
     void selectItem(const QModelIndex&);
+
 signals:
 
 };

@@ -9,27 +9,15 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    item.cpp \
-    itemtable.cpp \
-    itemtabledatabase.cpp \
+    database.cpp \
     main.cpp \
-    mainjournal.cpp \
-    mainwidget.cpp \
     mainwindow.cpp \
-    order.cpp \
-    test.cpp \
-    testitemtabledatabase.cpp
+    test.cpp
 
 HEADERS += \
-    item.h \
-    itemtable.h \
-    itemtabledatabase.h \
-    mainjournal.h \
-    mainwidget.h \
+    database.h \
     mainwindow.h \
-    order.h \
-    test.h \
-    testitemtabledatabase.h
+    test.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
