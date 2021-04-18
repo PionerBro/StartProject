@@ -21,7 +21,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex())const override;
     int columnCount(const QModelIndex &parent = QModelIndex())const override;
 private:
-    void setupModelData(const QStringList &lines, MyTreeItem* parent);
+    void setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent);
 
     MyTreeItem* rootItem;
     MyTreeItem* root;

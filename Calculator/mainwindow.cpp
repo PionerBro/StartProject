@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
          <<"44"
          <<"5"
          <<"55";
+
     MyTreeModel* model = new MyTreeModel(list,widget);
     view->setModel(model);
     connect(view, SIGNAL(doubleClicked(const QModelIndex&)), model, SLOT(rootItemChanged(const QModelIndex&)));

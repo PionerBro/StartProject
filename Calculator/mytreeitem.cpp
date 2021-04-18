@@ -1,4 +1,5 @@
 #include "mytreeitem.h"
+#include <QDebug>
 
 MyTreeItem::MyTreeItem(const QList<QVariant> &data, MyTreeItem* parent)
 {
@@ -9,6 +10,7 @@ MyTreeItem::MyTreeItem(const QList<QVariant> &data, MyTreeItem* parent)
 }
 
 MyTreeItem::~MyTreeItem(){
+    qDebug()<<itemData.value(0);
     qDeleteAll(childItems);
 }
 
