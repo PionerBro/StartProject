@@ -10,6 +10,7 @@
 #include <QTableView>
 #include <QToolBar>
 #include <QAction>
+#include "directorywidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     QToolBar* tool = new QToolBar("mew", widget);
     QAction* act = new QAction("New", tool);
     tool->addAction(act);
-
+    connect(act, SIGNAL(triggered()), this, SLOT(crDialog()));
     setCentralWidget(widget);
     QVBoxLayout* vbx = new QVBoxLayout(widget);
     QTableView* view = new QTableView(widget);
@@ -42,3 +43,7 @@ MainWindow::~MainWindow()
 {
 }
 
+void MainWindow::crDialog(){
+    DirectoryWidget* tDialog = new DirectoryWidget(this);
+    tDialog->exec();
+}

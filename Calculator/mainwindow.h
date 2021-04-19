@@ -10,6 +10,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+public slots:
+    void crDialog();
 };
 #endif // MAINWINDOW_H
 
