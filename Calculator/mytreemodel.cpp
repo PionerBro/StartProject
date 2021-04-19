@@ -1,11 +1,11 @@
 #include "mytreemodel.h"
 #include "mytreeitem.h"
+#include <QDebug>
 
-MyTreeModel::MyTreeModel(const QStringList &data, QObject* parent):QAbstractItemModel(parent)
+MyTreeModel::MyTreeModel(const QList<QVariant> &data, QObject* parent):QAbstractItemModel(parent)
 {
-    QList<QVariant> rootData;
-    rootData<<"Title"<<"Summary";
-    root = new MyTreeItem(rootData);
+    m_header = data;
+    root = new MyTreeItem(m_header);
     /*for(int i = 0; i <5; ++i){
         rootData.clear();
         rootData<<"item " + QString::number(i)<<i;
@@ -35,34 +35,34 @@ MyTreeModel::MyTreeModel(const QStringList &data, QObject* parent):QAbstractItem
     tmp<< 10 <<"item10" << 1 << 0;
     list<<tmp;
     tmp.clear();
-    tmp<< 11 <<"item11" << 0 << 1;
+    tmp<< 11 <<"item16" << 0 << 1;
     list<<tmp;
     tmp.clear();
-    tmp<< 12 <<"item10" << 2 << 1;
+    tmp<< 12 <<"item12" << 2 << 1;
     list<<tmp;
     tmp.clear();
-    tmp<< 13 <<"item10" << 0 << 2;
+    tmp<< 13 <<"item14" << 0 << 2;
     list<<tmp;
     tmp.clear();
-    tmp<< 14 <<"item10" << 0 << 1;
+    tmp<< 14 <<"item15" << 0 << 1;
     list<<tmp;
     tmp.clear();
-    tmp<< 15 <<"item10" << 3 << 1;
+    tmp<< 15 <<"item11" << 3 << 1;
     list<<tmp;
     tmp.clear();
-    tmp<< 16 <<"item10" << 4 << 2;
+    tmp<< 16 <<"item18" << 4 << 2;
     list<<tmp;
     tmp.clear();
-    tmp<< 17 <<"item10" << 0 << 1;
+    tmp<< 17 <<"item17" << 0 << 1;
     list<<tmp;
     tmp.clear();
-    tmp<< 18 <<"item10" << 0 << 2;
+    tmp<< 18 <<"item15" << 0 << 2;
     list<<tmp;
     tmp.clear();
-    tmp<< 19 <<"item10" << 0 << 4;
+    tmp<< 19 <<"item16" << 0 << 4;
     list<<tmp;
     tmp.clear();
-    tmp<< 20 <<"item10" << 0 << 4;
+    tmp<< 20 <<"item13" << 0 << 4;
     list<<tmp;
     tmp.clear();
 
@@ -107,7 +107,7 @@ QModelIndex MyTreeModel::index(int row, int column, const QModelIndex &parent)co
 
 QVariant MyTreeModel::headerData(int section, Qt::Orientation orientation, int role) const{
     if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return rootItem->data(section);
+        return m_header.value(section);
     return QVariant();
 }
 
@@ -132,10 +132,8 @@ int MyTreeModel::rowCount(const QModelIndex &parent)const{
 }
 
 int MyTreeModel::columnCount(const QModelIndex &parent)const{
-    if(parent.isValid())
-        return static_cast<MyTreeItem*>(parent.internalPointer())->columnCount();
-    else
-        return rootItem->columnCount();
+    Q_UNUSED(parent);
+    return m_header.count();
 }
 
 void MyTreeModel::setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent){
@@ -169,12 +167,14 @@ void MyTreeModel::setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem
             pItem->folder = true;
         }
     }
-
+    for(int i = 1; i<folders.count();++i){
+        folders[i]->sortItem();
+    }
 
     rootItem = parent;
 }
 
-void MyTreeModel::rootItemChanged(const QModelIndex& index){
+void MyTreeModel::rootItemChanged(QModelIndex index){
     MyTreeItem* item = static_cast<MyTreeItem*>(index.internalPointer());
     beginResetModel();
     if(item->folder){
@@ -184,6 +184,11 @@ void MyTreeModel::rootItemChanged(const QModelIndex& index){
         else{
             rootItem = item->parent();
         }
+    }else{
+        QList<QVariant> data;
+        data = item->rowData();
+
+        qDebug()<<data;
     }
     endResetModel();
 }

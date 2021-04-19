@@ -10,7 +10,7 @@ class MyTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    MyTreeModel(const QStringList &data, QObject* parent = 0);
+    MyTreeModel(const QList<QVariant> &data, QObject* parent = 0);
     ~MyTreeModel();
 
     QVariant data(const QModelIndex& index, int role)const override;
@@ -23,10 +23,11 @@ public:
 private:
     void setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent);
 
+    QList<QVariant> m_header;
     MyTreeItem* rootItem;
     MyTreeItem* root;
 private slots:
-    void rootItemChanged(const QModelIndex& index);
+    void rootItemChanged(QModelIndex index);
 };
 
 #endif // MYTREEMODEL_H

@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QRegularExpression>
 
 #define ENGWORDS "EngWords.txt"
 #define RUSWORDS "RusWords.txt"
@@ -53,8 +54,8 @@ void AddWords::addWords(){
     QString engstr = plneEngWord->text();
     QString russtr = plneRusWord->text();
 
-    if(engstr.toUpper().contains(QRegExp("[^-A-Z\\s]")) ||
-            russtr.toUpper().contains(QRegExp("[^-А-Я\\s]"))){
+    if(engstr.toUpper().contains(QRegularExpression("[^-A-Z\\s]")) ||
+            russtr.toUpper().contains(QRegularExpression("[^-А-Я\\s]"))){
         plblInfo->setText("Неверный ввод данных");
         return;
     }

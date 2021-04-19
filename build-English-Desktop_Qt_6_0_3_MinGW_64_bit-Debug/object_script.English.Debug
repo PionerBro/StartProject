@@ -1,0 +1,15 @@
+debug/addwords.o
+debug/main.o
+debug/mainmenu.o
+debug/mainwindow.o
+debug/registration.o
+debug/start.o
+debug/welcomepage.o
+debug/work.o
+debug/moc_addwords.o
+debug/moc_mainmenu.o
+debug/moc_mainwindow.o
+debug/moc_registration.o
+debug/moc_start.o
+debug/moc_welcomepage.o
+debug/moc_work.o

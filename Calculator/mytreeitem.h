@@ -11,11 +11,13 @@ public:
     ~MyTreeItem();
 
     QVariant data(int column) const;
+    QList<QVariant> rowData() const;
     MyTreeItem* child(int row);
     MyTreeItem* parent();
     int row() const;
     int columnCount()const;
     int childCount()const;
+    void sortItem();
 
     void appendChild(MyTreeItem* child);
     bool folder;

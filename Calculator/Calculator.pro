@@ -12,16 +12,12 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     mytreeitem.cpp \
-    mytreemodel.cpp \
-    mytreeview.cpp \
-    myview.cpp
+    mytreemodel.cpp
 
 HEADERS += \
     mainwindow.h \
     mytreeitem.h \
-    mytreemodel.h \
-    mytreeview.h \
-    myview.h
+    mytreemodel.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

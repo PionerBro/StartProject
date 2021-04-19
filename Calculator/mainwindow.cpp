@@ -8,32 +8,33 @@
 #include <QHeaderView>
 #include "mytreemodel.h"
 #include <QTableView>
+#include <QToolBar>
+#include <QAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     QWidget* widget = new QWidget(this);
+    QToolBar* tool = new QToolBar("mew", widget);
+    QAction* act = new QAction("New", tool);
+    tool->addAction(act);
+
     setCentralWidget(widget);
     QVBoxLayout* vbx = new QVBoxLayout(widget);
     QTableView* view = new QTableView(widget);
    // view->setSelectionBehavior(QAbstractItemView::SelectRows);
     view->setSelectionMode(QAbstractItemView::SingleSelection);
+    vbx->addWidget(tool);
     vbx->addWidget(view);
-    QStringList list;
-    list <<"1"
-         <<"11"
-         <<"2"
-         <<"22"
-         <<"3"
-         <<"33"
-         <<"4"
-         <<"44"
-         <<"5"
-         <<"55";
+    QList<QVariant> list;
+    list <<"Num"
+         <<"Name"
+         <<"Folder"
+         <<"Parent";
 
     MyTreeModel* model = new MyTreeModel(list,widget);
     view->setModel(model);
-    connect(view, SIGNAL(doubleClicked(const QModelIndex&)), model, SLOT(rootItemChanged(const QModelIndex&)));
+    connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
 }
 
 
