@@ -9,14 +9,18 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    calcitem.cpp \
     directorywidget.cpp \
+    diritem.cpp \
     main.cpp \
     mainwindow.cpp \
     mytreeitem.cpp \
     mytreemodel.cpp
 
 HEADERS += \
+    calcitem.h \
     directorywidget.h \
+    diritem.h \
     mainwindow.h \
     mytreeitem.h \
     mytreemodel.h

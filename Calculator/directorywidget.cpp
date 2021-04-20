@@ -1,5 +1,8 @@
 #include "directorywidget.h"
 #include "mytreemodel.h"
+#include "mytreeitem.h"
+#include "diritem.h"
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTableView>
@@ -11,6 +14,7 @@
 
 DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(parent, f)
 {
+    setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowFlag(Qt::WindowMaximizeButtonHint, true);
     QVBoxLayout* vbx = new QVBoxLayout(this);
     QToolBar* toolBar = new QToolBar(this);
@@ -18,13 +22,20 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     newAct->setShortcut(tr("INSERT"));
     connect(newAct, SIGNAL(triggered()),this, SLOT(createItem()));
     QAction* editAct = new QAction("edit", toolBar);
-    editAct->setShortcut(Qt::Key_Enter);
+    QList<QKeySequence> shCuts;
+    shCuts<<Qt::Key_Enter<<Qt::Key_Return;
+    editAct->setShortcuts(shCuts);
     connect(editAct, SIGNAL(triggered()), this, SLOT(editItem()));
     QAction* newFolder = new QAction("newFolder", toolBar);
     connect(newFolder, SIGNAL(triggered()), this, SLOT(createFolder()));
+    QAction* delItem = new QAction("delete", toolBar);
+    delItem->setShortcut(Qt::Key_Delete);
+    connect(delItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
     toolBar->addAction(newAct);
     toolBar->addAction(editAct);
     toolBar->addAction(newFolder);
+    toolBar->addAction(delItem);
+
     view = new QTableView(this);
     vbx->addWidget(toolBar);
     vbx->addWidget(view);
@@ -36,9 +47,11 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     model = new MyTreeModel(header, this);
     view->setModel(model);
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
-    //connect(view, SIGNAL(entered(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
     viewSettings();
+}
 
+DirectoryWidget::~DirectoryWidget(){
+    qDebug()<<"DirectoryWidget destroyed";
 }
 
 void DirectoryWidget::viewSettings(){
@@ -48,17 +61,32 @@ void DirectoryWidget::viewSettings(){
     view->setColumnHidden(3,true);
     view->resizeColumnsToContents();
     view->horizontalHeader()->setStretchLastSection(true);
-    view->setCurrentIndex(model->index(0,0,QModelIndex()));
+    view->setCurrentIndex(model->index(0,1,QModelIndex()));
 }
 
 void DirectoryWidget::createItem(){
-    qDebug()<<"createItem";
+    DirItem* item = new DirItem(this);
+    if(item->exec())
+        qDebug()<<"Item created";
+    else
+        qDebug()<<"Item not created";
 }
 
 void DirectoryWidget::editItem(){
-    qDebug()<<"editItem";
+    MyTreeItem* tItem = static_cast<MyTreeItem*>(view->currentIndex().internalPointer());
+    DirItem* item = new DirItem(tItem->rowData(), this);
+    if(item->exec())
+        qDebug()<<"Item changed";
+    else
+        qDebug()<<"Item not changed";
 }
 
 void DirectoryWidget::createFolder(){
-    qDebug()<<"createFolder";
+    QModelIndex index= view->currentIndex();
+    qDebug()<<"createFolder"<<index.row()<<index.column();
+}
+
+void DirectoryWidget::deleteItem(){
+    QModelIndex index= view->currentIndex();
+    qDebug()<<"deleteItem"<<index.row()<<index.column();
 }

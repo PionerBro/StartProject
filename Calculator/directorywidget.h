@@ -10,7 +10,8 @@ class DirectoryWidget : public QDialog
 {
     Q_OBJECT
 public:
-    DirectoryWidget(QWidget* parent, Qt::WindowFlags f = Qt::WindowFlags());
+    DirectoryWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~DirectoryWidget();
 private:
     QTableView* view;
     MyTreeModel* model;
@@ -20,6 +21,7 @@ private slots:
     void createItem();
     void createFolder();
     void editItem();
+    void deleteItem();
 };
 
 #endif // DIRECTORYWIDGET_H
