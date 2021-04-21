@@ -12,6 +12,7 @@ public:
     ~MainWindow();
 public slots:
     void crDialog();
+    void crCalc();
 };
 #endif // MAINWINDOW_H
 

@@ -11,6 +11,7 @@
 #include <QToolBar>
 #include <QAction>
 #include "directorywidget.h"
+#include "calcitem.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,6 +21,9 @@ MainWindow::MainWindow(QWidget *parent)
     QAction* act = new QAction("New", tool);
     tool->addAction(act);
     connect(act, SIGNAL(triggered()), this, SLOT(crDialog()));
+    QAction* act2 = new QAction("Calc", tool);
+    tool->addAction(act2);
+    connect(act2, SIGNAL(triggered()), this, SLOT(crCalc()));
     setCentralWidget(widget);
     QVBoxLayout* vbx = new QVBoxLayout(widget);
     QTableView* view = new QTableView(widget);
@@ -46,4 +50,13 @@ MainWindow::~MainWindow()
 void MainWindow::crDialog(){
     DirectoryWidget* tDialog = new DirectoryWidget(this);
     tDialog->exec();
+}
+
+void MainWindow::crCalc(){
+    CalcItem* item = new CalcItem(this);
+    if(item->exec()){
+        qDebug()<<"Calc created";
+    }else
+        qDebug()<<"Calc not created";
+
 }

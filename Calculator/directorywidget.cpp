@@ -73,12 +73,15 @@ void DirectoryWidget::createItem(){
 }
 
 void DirectoryWidget::editItem(){
-    MyTreeItem* tItem = static_cast<MyTreeItem*>(view->currentIndex().internalPointer());
-    DirItem* item = new DirItem(tItem->rowData(), this);
-    if(item->exec())
-        qDebug()<<"Item changed";
-    else
-        qDebug()<<"Item not changed";
+    QModelIndex index = view->currentIndex();
+    if(index.isValid()){
+        MyTreeItem* tItem = static_cast<MyTreeItem*>(index.internalPointer());
+        DirItem* item = new DirItem(tItem->rowData(), this);
+        if(item->exec())
+            qDebug()<<"Item changed";
+        else
+            qDebug()<<"Item not changed";
+    }
 }
 
 void DirectoryWidget::createFolder(){

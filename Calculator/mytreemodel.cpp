@@ -187,7 +187,6 @@ void MyTreeModel::rootItemChanged(QModelIndex index){
     }else{
         QList<QVariant> data;
         data = item->rowData();
-
         qDebug()<<data;
     }
     endResetModel();
