@@ -1,4 +1,8 @@
 #include "calcitem.h"
+#include "directorywidget.h"
+#include "mytreemodel.h"
+#include "cellwidget.h"
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTableWidget>
@@ -11,7 +15,7 @@
 
 #include <QDebug>
 
-CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
+CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f), tableRow(0)
 {
     setWindowFlag(Qt::WindowMaximizeButtonHint,true);
     resize(800,400);
@@ -38,14 +42,22 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     QHBoxLayout* hbx22 = new QHBoxLayout;
     hbx2->addLayout(hbx22);
     hbx2->setAlignment(hbx22, Qt::AlignRight);
-    QLabel* dateLabel = new QLabel(tr("Количество порций"), this);
+    QLabel* dateLabel = new QLabel(tr("Дата"), this);
     QDateEdit* dateEdit = new QDateEdit(QDate::currentDate(),this);
     dateEdit->setMinimumSize(80,25);
     dateEdit->setCalendarPopup(true);
     hbx22->addWidget(dateLabel);
     hbx22->addWidget(dateEdit);
 
-    QTableWidget* table = new QTableWidget(20,5,this);
+    QHBoxLayout* hbx3 = new QHBoxLayout;
+    vbx->addLayout(hbx3);
+    vbx->setAlignment(hbx3, Qt::AlignLeft);
+    QPushButton* btnAddRow = new QPushButton(tr("Добавить строку"),this);
+    btnAddRow->setMaximumSize(100,30);
+    hbx3->addWidget(btnAddRow);
+    connect(btnAddRow, SIGNAL(clicked()), this, SLOT(addRow()));
+
+    table = new QTableWidget(0,5,this);
     QStringList headers;
     headers<<tr("Наименование")
              <<tr("Ед.изм")
@@ -53,6 +65,8 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
              <<tr("Цена")
              <<tr("Сумма");
     table->setHorizontalHeaderLabels(headers);
+    table->setColumnWidth(0,300);
+    table->horizontalHeader()->setStretchLastSection(true);
     vbx->addWidget(table);
     QHBoxLayout* hbxBtn = new QHBoxLayout;
     vbx->addLayout(hbxBtn);
@@ -65,9 +79,61 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     btnCancel->setMaximumSize(100,30);
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
     hbxBtn->addWidget(btnCancel);
+    btnOk->setFocusPolicy(Qt::NoFocus);
+    btnCancel->setFocusPolicy(Qt::NoFocus);
+    btnAddRow->setFocusPolicy(Qt::NoFocus);
+    table->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::DoubleClicked);
+    connect(table, SIGNAL(cellActivated(int,int)), table, SIGNAL(cellClicked(int,int)));
 
 }
 
 CalcItem::~CalcItem(){
     qDebug()<<"CalcItem destroyed";
 }
+
+void CalcItem::addRow(){
+    CellWidget* cellWidget = new CellWidget(table);
+    connect(cellWidget->buttonWidget(), SIGNAL(clicked()), this, SLOT(chooseElement()));
+    cellWidget->setRow(tableRow);
+    cellWidget->setColumn(0);
+
+    table->insertRow(tableRow);
+    table->setCellWidget(tableRow,0, cellWidget);
+    table->setRowHeight(tableRow,25);
+    cellWidget->setText(QString("%1").arg(tableRow));
+
+    ++tableRow;
+}
+
+void CalcItem::chooseElement(){
+    QPushButton* sender = static_cast<QPushButton*>(QObject::sender());
+    setCurRow(static_cast<CellWidget*>(sender->parent())->row());
+    DirectoryWidget* dirWidget = new DirectoryWidget(sender);
+    connect(dirWidget->getModel(), SIGNAL(sendData(QString)), this, SLOT(receiveData(QString)));
+
+    if(dirWidget->exec()){
+        qDebug()<<"good";
+    }else{
+        qDebug()<<"bad";
+
+    }
+}
+
+void CalcItem::receiveData(QString data){
+    CellWidget* cellWidget = new CellWidget(table);
+    connect(cellWidget->buttonWidget(), SIGNAL(clicked()), this, SLOT(chooseElement()));
+    cellWidget->setRow(currRow());
+    cellWidget->setColumn(0);
+    table->setCellWidget(currRow(), 0, cellWidget);
+    cellWidget->setText(data);
+    qDebug()<<data<<" "<<table->currentRow();
+}
+
+int CalcItem::currRow() const{
+    return m_currentRow;
+}
+
+void CalcItem::setCurRow(int row){
+    m_currentRow = row;
+}
+

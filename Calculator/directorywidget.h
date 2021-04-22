@@ -12,11 +12,14 @@ class DirectoryWidget : public QDialog
 public:
     DirectoryWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~DirectoryWidget();
+
+    MyTreeModel* getModel() const;
 private:
     QTableView* view;
     MyTreeModel* model;
 
     void viewSettings();
+
 private slots:
     void createItem();
     void createFolder();

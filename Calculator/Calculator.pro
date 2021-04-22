@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     calcitem.cpp \
+    cellwidget.cpp \
     directorywidget.cpp \
     diritem.cpp \
     main.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
     calcitem.h \
+    cellwidget.h \
     directorywidget.h \
     diritem.h \
     mainwindow.h \

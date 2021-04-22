@@ -135,7 +135,7 @@ int MyTreeModel::columnCount(const QModelIndex &parent)const{
     Q_UNUSED(parent);
     return m_header.count();
 }
-
+//выгрузка элементов базы данных
 void MyTreeModel::setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent){
     /*QList<QVariant> list;
     list << "s"<<"11";
@@ -188,6 +188,7 @@ void MyTreeModel::rootItemChanged(QModelIndex index){
         QList<QVariant> data;
         data = item->rowData();
         qDebug()<<data;
+        emit sendData(data.value(1).toString());
     }
     endResetModel();
 }

@@ -93,3 +93,7 @@ void DirectoryWidget::deleteItem(){
     QModelIndex index= view->currentIndex();
     qDebug()<<"deleteItem"<<index.row()<<index.column();
 }
+
+MyTreeModel* DirectoryWidget::getModel()const{
+    return model;
+}

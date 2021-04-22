@@ -26,6 +26,8 @@ private:
     QList<QVariant> m_header;
     MyTreeItem* rootItem;
     MyTreeItem* root;
+signals:
+    void sendData(QString);
 private slots:
     void rootItemChanged(QModelIndex index);
 };
