@@ -27,7 +27,7 @@ private:
     MyTreeItem* rootItem;
     MyTreeItem* root;
 signals:
-    void sendData(QString);
+    void sendData(QList<QVariant>&);
 private slots:
     void rootItemChanged(QModelIndex index);
 };

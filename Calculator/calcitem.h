@@ -17,14 +17,16 @@ public:
     int currRow()const;
     void setCurRow(int row);
 private:
-    int tableRow;
+    int tableRows;
     int m_currentRow;
     QTableWidget* table;
+    QLabel* sumLabel;
 
 public slots:
     void addRow();
     void chooseElement();
-    void receiveData(QString);
+    void receiveData(QList<QVariant>&);
+    void dataChanged(int,int);
 };
 
 #endif // CALCITEM_H
