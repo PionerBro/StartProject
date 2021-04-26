@@ -6,6 +6,7 @@
 
 class QTableWidget;
 class QLabel;
+class CalcTableWidget;
 
 class CalcItem : public QDialog
 {
@@ -14,18 +15,11 @@ public:
     CalcItem(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~CalcItem();
 
-    int currRow()const;
-    void setCurRow(int row);
 private:
-    int tableRows;
-    int m_currentRow;
-    QTableWidget* table;
+    CalcTableWidget* table;
     QLabel* sumLabel;
 
 public slots:
-    void addRow();
-    void chooseElement();
-    void receiveData(QList<QVariant>&);
     void dataChanged(int,int);
 };
 

@@ -16,7 +16,7 @@ public:
     int column()const;
     QPushButton* buttonWidget()const;
 public slots:
-    void setText(QString text);                     //set m_label`s text:
+    void setText(QString text);                     //set m_label`s text
     void setRow(int);
     void setColumn(int);
 private:

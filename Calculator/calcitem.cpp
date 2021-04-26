@@ -2,6 +2,7 @@
 #include "directorywidget.h"
 #include "mytreemodel.h"
 #include "cellwidget.h"
+#include "calctablewidget.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -14,7 +15,7 @@
 
 #include <QDebug>
 
-CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f), tableRows(0)
+CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
 {
     setWindowFlag(Qt::WindowMaximizeButtonHint,true);
     resize(800,400);
@@ -57,14 +58,13 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f), tableR
     btnAddRow->setMaximumSize(100,30);
     btnAddRow->setShortcut(Qt::Key_Insert);
     hbx31->addWidget(btnAddRow);
-    connect(btnAddRow, SIGNAL(clicked()), this, SLOT(addRow()));
 
     QHBoxLayout* hbx32 = new QHBoxLayout;
     hbx3->addLayout(hbx32);
     hbx3->setAlignment(hbx32, Qt::AlignRight);
     sumLabel = new QLabel("sad",this);
     hbx32->addWidget(sumLabel, 0, Qt::AlignRight);
-    table = new QTableWidget(0,5,this);
+    table = new CalcTableWidget(0,5,this);
     QStringList headers;
     headers<<tr("Наименование")
              <<tr("Ед.изм")
@@ -74,6 +74,7 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f), tableR
     table->setHorizontalHeaderLabels(headers);
     table->setColumnWidth(0,300);
     table->horizontalHeader()->setStretchLastSection(true);
+    connect(btnAddRow, SIGNAL(clicked()), table, SLOT(addNewRow()));
     vbx->addWidget(table);
     QHBoxLayout* hbxBtn = new QHBoxLayout;
     vbx->addLayout(hbxBtn);
@@ -91,77 +92,11 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f), tableR
     btnAddRow->setFocusPolicy(Qt::NoFocus);
     table->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::DoubleClicked);
     connect(table, SIGNAL(cellChanged(int,int)), this, SLOT(dataChanged(int,int)));
+
 }
 
 CalcItem::~CalcItem(){
     qDebug()<<"CalcItem destroyed";
-}
-
-/*add row in table slot*/
-void CalcItem::addRow(){
-    /*create and set cell widget*/
-    CellWidget* cellWidget = new CellWidget(table);
-    connect(cellWidget->buttonWidget(), SIGNAL(clicked()), this, SLOT(chooseElement()));
-    cellWidget->setRow(tableRows);
-    cellWidget->setColumn(0);
-
-    table->insertRow(tableRows);                             //insert row to the end
-    table->setCellWidget(tableRows,0, cellWidget);           //set cell widget in position
-    table->setRowHeight(tableRows,25);
-    cellWidget->setText(QString("%1").arg(tableRows));
-
-    ++tableRows;                                             //increment table rows
-    emit cellWidget->buttonWidget()->clicked();
-}
-
-
-/*Cell Widget's button clicked slot*/
-void CalcItem::chooseElement(){
-    QPushButton* sender = static_cast<QPushButton*>(QObject::sender());         //get button object, which clicked
-    setCurRow(static_cast<CellWidget*>(sender->parent())->row());               //set current row variable
-    DirectoryWidget* dirWidget = new DirectoryWidget(sender);                   //create numenclature Dialog widget
-    connect(dirWidget->getModel(), SIGNAL(sendData(QList<QVariant>&)), this, SLOT(receiveData(QList<QVariant>&))); //when element is chosen emit signal with element's data
-
-    if(dirWidget->exec()){
-        qDebug()<<"good";
-    }else{
-        qDebug()<<"bad";
-
-    }
-}
-
-/*fill the cell data slot emit by nomenclature widget signal*/
-void CalcItem::receiveData(QList<QVariant>& data){
-    /*create and set cell widget*/
-    CellWidget* cellWidget = new CellWidget(table);
-    connect(cellWidget->buttonWidget(), SIGNAL(clicked()), this, SLOT(chooseElement()));
-    cellWidget->setRow(currRow());
-    cellWidget->setColumn(0);
-    table->setCellWidget(currRow(), 0, cellWidget);         //set cell widget in current position
-    cellWidget->setText(data.value(1).toString());
-
-    QTableWidgetItem* item = new QTableWidgetItem();
-    item->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
-    item->setData(Qt::DisplayRole, data.value(2));
-    table->setItem(currRow(),1,item);
-
-    item = new QTableWidgetItem();
-    item->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
-    item->setData(Qt::DisplayRole, data.value(0));
-    table->setItem(currRow(),3,item);
-
-    //item->setData(Qt::EditRole, data.value(0));
-    //qDebug()<<item->text();
-
-    qDebug()<<data<<" "<<table->currentRow();
-}
-
-int CalcItem::currRow() const{
-    return m_currentRow;
-}
-
-void CalcItem::setCurRow(int row){
-    m_currentRow = row;
 }
 
 void CalcItem::dataChanged(int row, int column){
@@ -169,15 +104,16 @@ void CalcItem::dataChanged(int row, int column){
         QTableWidgetItem* item = new QTableWidgetItem();
         item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         if(table->item(row,2) && table->item(row,3)){
-            item->setData(Qt::DisplayRole, table->item(row,2)->data(Qt::DisplayRole).toInt() * table->item(row,3)->data(Qt::DisplayRole).toInt());
+            item->setData(Qt::DisplayRole, table->item(row,2)->data(Qt::DisplayRole).toDouble() * table->item(row,3)->data(Qt::DisplayRole).toDouble());
         }
         table->setItem(row, 4, item);
-        int sum = 0;
-        for(int i = 0; i < tableRows; ++i){
+        double sum = 0;
+        for(int i = 0; i < table->rowCount(); ++i){
             if(table->item(i,4)){
-                sum+=table->item(i,4)->data(Qt::DisplayRole).toInt();
+                sum+=table->item(i,4)->data(Qt::DisplayRole).toDouble();
             }
         }
-        sumLabel->setText(QString::number(sum));
+
+        sumLabel->setText(QString::number(sum, 'f', 2));
     }
 }
