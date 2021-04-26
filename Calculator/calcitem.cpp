@@ -28,6 +28,7 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     hbx1->addWidget(nameLabel);
     hbx1->addWidget(nameEdit);
 
+
     QHBoxLayout* hbx2 = new QHBoxLayout;
     vbx->addLayout(hbx2);
     QHBoxLayout* hbx21 = new QHBoxLayout;

@@ -8,6 +8,7 @@
 #include <QKeyEvent>
 #include <QLineEdit>
 
+
 #include <QDebug>
 
 CalcTableWidget::CalcTableWidget(QWidget* parent):QTableWidget(parent)
@@ -29,7 +30,8 @@ void CalcTableWidget::addNewRow(){
     setCellWidget(rowNum,0, cellWidget);           //set cell widget in position
     setRowHeight(rowNum,25);
     cellWidget->setText(QString("%1").arg(rowNum));
-    //increment table rows
+    setItem(rowNum,2,new QTableWidgetItem());
+
     emit cellWidget->buttonWidget()->clicked();
 }
 
@@ -72,8 +74,10 @@ void CalcTableWidget::setRowData(QList<QVariant>& data){
 
 bool CalcTableWidget::event(QEvent* e){
     if(e->type() == QEvent::KeyPress && static_cast<QKeyEvent*>(e)->key() == Qt::Key_Return){
-        qDebug()<<"Enter";
-        emit doubleClicked(currentIndex());
+        if(currentColumn()==0){
+            emit static_cast<CellWidget*>(cellWidget(currentRow(), currentColumn()))->buttonWidget()->clicked();
+        }
+        editItem(currentItem());
     }
     return QTableWidget::event(e);
 }
