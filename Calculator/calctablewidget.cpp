@@ -7,7 +7,9 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLineEdit>
-
+#include <QDoubleValidator>
+#include <QHBoxLayout>
+#include <QLabel>
 
 #include <QDebug>
 
@@ -30,7 +32,9 @@ void CalcTableWidget::addNewRow(){
     setCellWidget(rowNum,0, cellWidget);           //set cell widget in position
     setRowHeight(rowNum,25);
     cellWidget->setText(QString("%1").arg(rowNum));
-    setItem(rowNum,2,new QTableWidgetItem());
+
+    QTableWidgetItem* wItem = new QTableWidgetItem();
+    setItem(rowNum,2,wItem);
 
     emit cellWidget->buttonWidget()->clicked();
 }
@@ -73,11 +77,17 @@ void CalcTableWidget::setRowData(QList<QVariant>& data){
 }
 
 bool CalcTableWidget::event(QEvent* e){
-    if(e->type() == QEvent::KeyPress && static_cast<QKeyEvent*>(e)->key() == Qt::Key_Return){
-        if(currentColumn()==0){
-            emit static_cast<CellWidget*>(cellWidget(currentRow(), currentColumn()))->buttonWidget()->clicked();
-        }
-        editItem(currentItem());
+    if(e->type() == QEvent::KeyPress)
+        if(static_cast<QKeyEvent*>(e)->key() == Qt::Key_Return || static_cast<QKeyEvent*>(e)->key() == Qt::Key_Enter){
+            if(currentColumn()==0){
+                emit static_cast<CellWidget*>(cellWidget(currentRow(), currentColumn()))->buttonWidget()->clicked();
+            }
+            editItem(currentItem());
     }
     return QTableWidget::event(e);
+}
+
+void CalcTableWidget::keyPressEvent(QKeyEvent *event){
+    qDebug()<<event->key();
+    QTableWidget::keyPressEvent(event);
 }
