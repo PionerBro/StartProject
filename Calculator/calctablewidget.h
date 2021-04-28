@@ -12,7 +12,7 @@ public:
 
 protected:
     virtual bool event(QEvent* e) override;
-    virtual void keyPressEvent(QKeyEvent* event) override;
+
 public slots:
     void addNewRow();
     void cellWidgetButtonClicked();

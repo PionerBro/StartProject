@@ -3,6 +3,7 @@
 #include "mytreemodel.h"
 #include "cellwidget.h"
 #include "calctablewidget.h"
+#include "calcitem2delegate.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -75,6 +76,10 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     table->setHorizontalHeaderLabels(headers);
     table->setColumnWidth(0,300);
     table->horizontalHeader()->setStretchLastSection(true);
+    CalcItem2Delegate* delegate = new CalcItem2Delegate(table);
+    table->setItemDelegateForColumn(2, delegate);
+    table->setItemDelegateForColumn(3, delegate);
+    table->setItemDelegateForColumn(4, delegate);
     connect(btnAddRow, SIGNAL(clicked()), table, SLOT(addNewRow()));
     vbx->addWidget(table);
     QHBoxLayout* hbxBtn = new QHBoxLayout;
@@ -104,8 +109,8 @@ void CalcItem::dataChanged(int row, int column){
     if(column==2 || column == 3){
         QTableWidgetItem* item = new QTableWidgetItem();
         item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        if(table->item(row,2) && table->item(row,3)){
-            item->setData(Qt::DisplayRole, table->item(row,2)->data(Qt::DisplayRole).toDouble() * table->item(row,3)->data(Qt::DisplayRole).toDouble());
+        if(table->item(row,2) && table->item(row,3)){           
+            item->setData(Qt::DisplayRole, QString::number((table->item(row,2)->data(Qt::DisplayRole).toDouble() * table->item(row,3)->data(Qt::DisplayRole).toDouble()),'f',2));
         }
         table->setItem(row, 4, item);
         double sum = 0;

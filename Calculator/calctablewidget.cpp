@@ -10,14 +10,17 @@
 #include <QDoubleValidator>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QTextEdit>
 
 #include <QDebug>
 
 CalcTableWidget::CalcTableWidget(QWidget* parent):QTableWidget(parent)
 {
+
 }
 
 CalcTableWidget::CalcTableWidget(int rows, int columns, QWidget* parent):QTableWidget(rows,columns,parent){
+
 }
 
 void CalcTableWidget::addNewRow(){
@@ -35,6 +38,8 @@ void CalcTableWidget::addNewRow(){
 
     QTableWidgetItem* wItem = new QTableWidgetItem();
     setItem(rowNum,2,wItem);
+
+
 
     emit cellWidget->buttonWidget()->clicked();
 }
@@ -72,7 +77,7 @@ void CalcTableWidget::setRowData(QList<QVariant>& data){
 
     item = new QTableWidgetItem();
     item->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
-    item->setData(Qt::DisplayRole, data.value(0));
+    item->setData(Qt::DisplayRole, QString::number(data.value(0).toDouble(),'f',2));
     setItem(rowNum,3,item);
 }
 
@@ -85,9 +90,4 @@ bool CalcTableWidget::event(QEvent* e){
             editItem(currentItem());
     }
     return QTableWidget::event(e);
-}
-
-void CalcTableWidget::keyPressEvent(QKeyEvent *event){
-    qDebug()<<event->key();
-    QTableWidget::keyPressEvent(event);
 }
