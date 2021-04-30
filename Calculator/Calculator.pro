@@ -1,6 +1,6 @@
 QT       += core gui sql
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++11
 
@@ -18,7 +18,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     mytreeitem.cpp \
-    mytreemodel.cpp
+    mytreemodel.cpp \
+    printwidget.cpp
 
 HEADERS += \
     calcitem.h \
@@ -29,7 +30,8 @@ HEADERS += \
     diritem.h \
     mainwindow.h \
     mytreeitem.h \
-    mytreemodel.h
+    mytreemodel.h \
+    printwidget.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

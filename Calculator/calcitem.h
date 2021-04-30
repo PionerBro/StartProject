@@ -21,6 +21,7 @@ private:
 
 public slots:
     void dataChanged(int,int);
+    void printSlot();
 };
 
 #endif // CALCITEM_H

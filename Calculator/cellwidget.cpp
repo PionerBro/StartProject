@@ -44,3 +44,6 @@ void CellWidget::setColumn(int column){
 QPushButton* CellWidget::buttonWidget()const{
     return m_btn;
 }
+QString CellWidget::text() const{
+    return m_label->text();
+}

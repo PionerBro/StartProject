@@ -14,6 +14,7 @@ public:
     ~CellWidget();
     int row()const;
     int column()const;
+    QString text() const;
     QPushButton* buttonWidget()const;
 public slots:
     void setText(QString text);                     //set m_label`s text

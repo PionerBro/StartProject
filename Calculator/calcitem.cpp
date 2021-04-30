@@ -4,6 +4,7 @@
 #include "cellwidget.h"
 #include "calctablewidget.h"
 #include "calcitem2delegate.h"
+#include "printwidget.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -13,6 +14,7 @@
 #include <QLabel>
 #include <QHeaderView>
 #include <QDateEdit>
+#include <QDialog>
 
 #include <QDebug>
 
@@ -85,20 +87,32 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     QHBoxLayout* hbxBtn = new QHBoxLayout;
     vbx->addLayout(hbxBtn);
     vbx->setAlignment(hbxBtn, Qt::AlignHCenter);
+    QHBoxLayout* hbxBtn1 = new QHBoxLayout;
+    QHBoxLayout* hbxBtn2 = new QHBoxLayout;
+    QHBoxLayout* hbxBtn3 = new QHBoxLayout;
+    hbxBtn->addLayout(hbxBtn1);
+    hbxBtn->addLayout(hbxBtn2);
+    hbxBtn->addLayout(hbxBtn3);
+    hbxBtn->setAlignment(hbxBtn2, Qt::AlignHCenter);
+    hbxBtn->setAlignment(hbxBtn3, Qt::AlignRight);
     QPushButton* btnOk = new QPushButton(tr("Ок"),this);
     btnOk->setMaximumSize(100,30);
     connect(btnOk, SIGNAL(clicked()), this, SLOT(accept()));
-    hbxBtn->addWidget(btnOk);
+    hbxBtn2->addWidget(btnOk);
     QPushButton* btnCancel = new QPushButton(tr("Отмена"), this);
     btnCancel->setMaximumSize(100,30);
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
-    hbxBtn->addWidget(btnCancel);
+    hbxBtn2->addWidget(btnCancel);
     btnOk->setFocusPolicy(Qt::NoFocus);
     btnCancel->setFocusPolicy(Qt::NoFocus);
     btnAddRow->setFocusPolicy(Qt::NoFocus);
+    QPushButton* btnPrint = new QPushButton(tr("Печать"), this);
+    btnPrint->setMaximumSize(70,30);
+    hbxBtn3->addWidget(btnPrint, 0, Qt::AlignRight);
+    btnPrint->setFocusPolicy(Qt::NoFocus);
     table->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::DoubleClicked);
     connect(table, SIGNAL(cellChanged(int,int)), this, SLOT(dataChanged(int,int)));
-
+    connect(btnPrint, SIGNAL(clicked()), this, SLOT(printSlot()));
 }
 
 CalcItem::~CalcItem(){
@@ -122,4 +136,48 @@ void CalcItem::dataChanged(int row, int column){
 
         sumLabel->setText(QString::number(sum, 'f', 2));
     }
+}
+
+void CalcItem::printSlot(){
+    /*QPrinter printer;
+    QPrintDialog print(&printer, this);
+    if(print.exec()){
+        QPainter painter;
+        if(!painter.begin(&printer)){
+            qDebug()<<"error";
+        }
+        painter.setFont(QFont("Airal", 14)); //шрифт
+        painter.setPen(QPen(2)); // толщина линий таблицы
+        int y_pdf = 30;
+        int WtabPdf=350;
+        int X_oneTab = 20;
+        int X_twoTab = 370;
+        int H_tab = 25;
+        painter.drawText(230,y_pdf, "Протокол № " + table->model()->data(table->indexFromItem(table->item(0, 2))).toString());
+        y_pdf +=H_tab;
+        QRect rectfont = QRect(X_oneTab,y_pdf,WtabPdf,H_tab);
+        painter.drawRect(rectfont);
+        painter.drawText(rectfont, Qt::AlignLeft ,"Заводской номер");
+        rectfont.setRect(X_twoTab,y_pdf,WtabPdf,H_tab);
+        painter.drawRect(rectfont);
+        painter.drawText(rectfont, Qt::AlignLeft ,table->model()->data(table->indexFromItem(table->item(0, 2))).toString());
+                // и так далее рисуем
+        painter.end(); // завершаем рисование
+    }
+    */
+    QList<QStringList> data;
+    for(int i = 0; i<table->rowCount(); ++i){
+        QStringList row;
+        row<<static_cast<CellWidget*>(table->cellWidget(i, 0))->text()
+           <<table->item(i,1)->data(Qt::DisplayRole).toString()
+           <<table->item(i,2)->data(Qt::DisplayRole).toString()
+           <<table->item(i,3)->data(Qt::DisplayRole).toString()
+           <<table->item(i,4)->data(Qt::DisplayRole).toString();
+        data<<row;
+    }
+    qDebug()<<data;
+    PrintWidget* print = new PrintWidget(data, this);
+    print->exec();
+    qDebug()<<"hello";
+
 }

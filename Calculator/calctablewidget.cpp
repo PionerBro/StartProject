@@ -37,9 +37,16 @@ void CalcTableWidget::addNewRow(){
     cellWidget->setText(QString("%1").arg(rowNum));
 
     QTableWidgetItem* wItem = new QTableWidgetItem();
+    setItem(rowNum,1,wItem);
+
+    wItem = new QTableWidgetItem();
     setItem(rowNum,2,wItem);
 
+    wItem = new QTableWidgetItem();
+    setItem(rowNum,3,wItem);
 
+    wItem = new QTableWidgetItem();
+    setItem(rowNum,4,wItem);
 
     emit cellWidget->buttonWidget()->clicked();
 }
