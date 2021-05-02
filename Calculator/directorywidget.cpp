@@ -19,22 +19,26 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     QVBoxLayout* vbx = new QVBoxLayout(this);
     QToolBar* toolBar = new QToolBar(this);
     QAction* newAct = new QAction("new", toolBar);
-    newAct->setShortcut(tr("INSERT"));
+    newAct->setShortcut(Qt::Key_Insert);
     connect(newAct, SIGNAL(triggered()),this, SLOT(createItem()));
     QAction* editAct = new QAction("edit", toolBar);
-    QList<QKeySequence> shCuts;
-    shCuts<<Qt::Key_Enter<<Qt::Key_Return;
-    editAct->setShortcuts(shCuts);
+    editAct->setShortcut(Qt::Key_F4);
     connect(editAct, SIGNAL(triggered()), this, SLOT(editItem()));
     QAction* newFolder = new QAction("newFolder", toolBar);
     connect(newFolder, SIGNAL(triggered()), this, SLOT(createFolder()));
     QAction* delItem = new QAction("delete", toolBar);
     delItem->setShortcut(Qt::Key_Delete);
     connect(delItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
+    QAction* selItem = new QAction("selectItem", toolBar);
+    QList<QKeySequence> shCuts;
+    shCuts<<Qt::Key_Enter<<Qt::Key_Return;
+    selItem->setShortcuts(shCuts);
+    connect(selItem, SIGNAL(triggered()), this, SLOT(selectItem()));
     toolBar->addAction(newAct);
     toolBar->addAction(editAct);
     toolBar->addAction(newFolder);
     toolBar->addAction(delItem);
+    toolBar->addAction(selItem);
 
     view = new QTableView(this);
     vbx->addWidget(toolBar);
@@ -94,6 +98,11 @@ void DirectoryWidget::deleteItem(){
     qDebug()<<"deleteItem"<<index.row()<<index.column();
 }
 
+void DirectoryWidget::selectItem(){
+    emit view->doubleClicked(view->currentIndex());
+}
+
 MyTreeModel* DirectoryWidget::getModel()const{
     return model;
 }
+

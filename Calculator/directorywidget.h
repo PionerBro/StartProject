@@ -25,6 +25,7 @@ private slots:
     void createFolder();
     void editItem();
     void deleteItem();
+    void selectItem();
 };
 
 #endif // DIRECTORYWIDGET_H

@@ -89,12 +89,23 @@ void CalcTableWidget::setRowData(QList<QVariant>& data){
 }
 
 bool CalcTableWidget::event(QEvent* e){
-    if(e->type() == QEvent::KeyPress)
-        if(static_cast<QKeyEvent*>(e)->key() == Qt::Key_Return || static_cast<QKeyEvent*>(e)->key() == Qt::Key_Enter){
+    if(e->type() == QEvent::KeyPress){
+        int eKey = static_cast<QKeyEvent*>(e)->key();
+        if(eKey == Qt::Key_Return || eKey == Qt::Key_Enter){
             if(currentColumn()==0){
                 emit static_cast<CellWidget*>(cellWidget(currentRow(), currentColumn()))->buttonWidget()->clicked();
             }
             editItem(currentItem());
+
+        }else if(eKey == Qt::Key_Delete){
+            int row = currentIndex().row();
+            if(row > -1){
+                removeRow(row);
+                emit cellChanged(-1,-1);
+            }
+        }
+
     }
     return QTableWidget::event(e);
 }
+
