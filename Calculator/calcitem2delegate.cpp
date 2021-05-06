@@ -1,6 +1,8 @@
 #include "calcitem2delegate.h"
+#include "mydoublevalidator.h"
 #include <QLineEdit>
 #include <QDoubleValidator>
+
 
 CalcItem2Delegate::CalcItem2Delegate(QObject* parent):QItemDelegate(parent)
 {    
@@ -8,7 +10,7 @@ CalcItem2Delegate::CalcItem2Delegate(QObject* parent):QItemDelegate(parent)
 
 QWidget* CalcItem2Delegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const{
     QLineEdit* l = new QLineEdit(parent);
-    l->setValidator(new QDoubleValidator(0,999,2,l));
+    l->setValidator(new MyDoubleValidator(0,999,2,l));
     return l;
 }
 
@@ -18,7 +20,7 @@ void CalcItem2Delegate::setEditorData(QWidget *editor, const QModelIndex &index)
 
 void CalcItem2Delegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const{
     QString text = static_cast<QLineEdit*>(editor)->text();
-    int count = 0;
+    /*int count = 0;
     int size = text.size();
     int num = size - 1;
     if(size!=0){
@@ -40,7 +42,7 @@ void CalcItem2Delegate::setModelData(QWidget *editor, QAbstractItemModel *model,
         else if(count == 2)
            text[num] = '.';
     }
-
+    */
     model->setData(index,text);
 }
 

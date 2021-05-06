@@ -5,6 +5,7 @@
 #include "calctablewidget.h"
 #include "calcitem2delegate.h"
 #include "printwidget.h"
+#include "mydoublevalidator.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -15,6 +16,7 @@
 #include <QHeaderView>
 #include <QDateEdit>
 #include <QDialog>
+#include <QAction>
 
 #include <QDebug>
 
@@ -42,7 +44,7 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     portionEdit = new QLineEdit(this);
     portionEdit->setText("");
     portionEdit->setMaximumSize(60, 25);
-    QDoubleValidator* validator = new QDoubleValidator(0,10000,3,this);
+    MyDoubleValidator* validator = new MyDoubleValidator(0,10000,3,this);
     validator->setLocale(QLocale::C);
     portionEdit->setValidator(validator);
     hbx21->addWidget(portionsLabel,0,Qt::AlignLeft);
@@ -100,7 +102,10 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     QLabel* sizeLabel = new QLabel(tr("Порция, г.: "),this);
     sizeEdit = new QLineEdit("",this);
     sizeEdit->setMaximumSize(100, 25);
-    sizeEdit->setValidator(new QDoubleValidator(0,100000,3,sizeEdit));
+    sizeEdit->setValidator(new MyDoubleValidator(0,10000,3,sizeEdit));
+    QAction* sizeEd = new QAction(sizeEdit);
+    connect(sizeEd, SIGNAL(triggered()), sizeEdit, SIGNAL(editingFinished()));
+    sizeEd->setShortcut(Qt::Key_Enter);
     hbxSize->addWidget(sizeLabel, Qt::AlignRight);
     hbxSize->setAlignment(sizeLabel, Qt::AlignRight);
     hbxSize->addWidget(sizeEdit, Qt::AlignRight);

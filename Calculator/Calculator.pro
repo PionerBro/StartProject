@@ -17,6 +17,7 @@ SOURCES += \
     diritem.cpp \
     main.cpp \
     mainwindow.cpp \
+    mydoublevalidator.cpp \
     mytreeitem.cpp \
     mytreemodel.cpp \
     printwidget.cpp
@@ -29,6 +30,7 @@ HEADERS += \
     directorywidget.h \
     diritem.h \
     mainwindow.h \
+    mydoublevalidator.h \
     mytreeitem.h \
     mytreemodel.h \
     printwidget.h
