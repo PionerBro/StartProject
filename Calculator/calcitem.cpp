@@ -44,9 +44,8 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     portionEdit = new QLineEdit(this);
     portionEdit->setText("");
     portionEdit->setMaximumSize(60, 25);
-    MyDoubleValidator* validator = new MyDoubleValidator(0,10000,3,this);
-    validator->setLocale(QLocale::C);
-    portionEdit->setValidator(validator);
+    MyDoubleValidator* validator = new MyDoubleValidator(0,10000,3,portionEdit,MyDoubleValidator::DigitalPoint::Dot);
+    portionEdit->setValidator(validator);   
     hbx21->addWidget(portionsLabel,0,Qt::AlignLeft);
     hbx21->addWidget(portionEdit,0,Qt::AlignLeft);
     hbx21->addSpacing(100);
@@ -102,10 +101,8 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     QLabel* sizeLabel = new QLabel(tr("Порция, г.: "),this);
     sizeEdit = new QLineEdit("",this);
     sizeEdit->setMaximumSize(100, 25);
-    sizeEdit->setValidator(new MyDoubleValidator(0,10000,3,sizeEdit));
-    QAction* sizeEd = new QAction(sizeEdit);
-    connect(sizeEd, SIGNAL(triggered()), sizeEdit, SIGNAL(editingFinished()));
-    sizeEd->setShortcut(Qt::Key_Enter);
+    //MyDoubleValidator* sizeEditValidator = new MyDoubleValidator(0,10000,3,sizeEdit);
+    sizeEdit->setValidator(validator);
     hbxSize->addWidget(sizeLabel, Qt::AlignRight);
     hbxSize->setAlignment(sizeLabel, Qt::AlignRight);
     hbxSize->addWidget(sizeEdit, Qt::AlignRight);

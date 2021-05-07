@@ -10,7 +10,7 @@ CalcItem2Delegate::CalcItem2Delegate(QObject* parent):QItemDelegate(parent)
 
 QWidget* CalcItem2Delegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const{
     QLineEdit* l = new QLineEdit(parent);
-    l->setValidator(new MyDoubleValidator(0,999,2,l));
+    l->setValidator(new MyDoubleValidator(0,999,2,l,MyDoubleValidator::DigitalPoint::Dot, MyDoubleValidator::DecVersion::Expanded));
     return l;
 }
 

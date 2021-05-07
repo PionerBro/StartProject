@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+class QPrinter;
+
 class PrintWidget : public QDialog
 {
     Q_OBJECT
@@ -12,8 +14,9 @@ protected:
     virtual void paintEvent(QPaintEvent* e)override;
     void drawDocum(QPainter *qp);
 private:
-    //QPainter* qp;
     QList<QStringList> data;
+private slots:
+    void printText();
 signals:
 
 };

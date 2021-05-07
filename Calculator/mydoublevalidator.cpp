@@ -4,11 +4,13 @@
 #include <QDebug>
 #include <QLineEdit>
 
-MyDoubleValidator::MyDoubleValidator(double bottom, double top, int decimals, QObject* parent):QValidator(parent)
+MyDoubleValidator::MyDoubleValidator(double bottom, double top, int decimals, QObject* parent, DigitalPoint digPoint, DecVersion decV):QValidator(parent)
 {
         b = bottom;
         t = top;
         m_dec = decimals;
+        m_digPoint = digPoint;
+        m_decVersion = decV;
 }
 
 static int numDigits(qlonglong n){
@@ -25,13 +27,18 @@ static qlonglong pow10(int exp){
 }
 
 QValidator::State MyDoubleValidator::validate(QString &input, int &) const{
+
     QByteArray buff;
     int digPointNum = -1;
     if(!validateChars(input, &buff, digPointNum))
         return QValidator::Invalid;
 
-    if(digPointNum != -1)
-        input[digPointNum]='.';
+    if(digPointNum != -1){
+        if(m_digPoint == DigitalPoint::Dot){
+            input[digPointNum]='.';
+        }else
+            input[digPointNum]=',';
+    }
 
     if(buff.isEmpty())
         return  QValidator::Intermediate;
@@ -49,12 +56,17 @@ QValidator::State MyDoubleValidator::validate(QString &input, int &) const{
     if(!ok)
         return QValidator::Intermediate;
 
-    if(digPointNum==(input.size()-1 - m_dec) && input.size()>(1+m_dec))
-        return QValidator::Acceptable;
+    if(m_decVersion == DecVersion::Expanded){
+        if(digPointNum==(input.size()-1 - m_dec) && input.size()>(1+m_dec))
+            return QValidator::Acceptable;
 
     if(i >= b && i <= t)
         return QValidator::Intermediate;
-
+    }else{
+        if(digPointNum != 0 && i >= b && i <= t){
+            return QValidator::Acceptable;
+        }
+    }
 
     double max = qMax(qAbs(b),qAbs(t));
     if((qlonglong)max < LLONG_MAX){
@@ -81,17 +93,15 @@ void MyDoubleValidator::fixup(QString &input) const{
     if(!validateChars(input, &buff, digPointNum))
         return ;
 
-
-    if(input.isEmpty()){
-        input.append("0.");
-        for(int i = 0; i<m_dec; ++i)
-            input.append('0');
-        return;
-    }
-
-
     int inputSize = input.size();
-    if(digPointNum != -1){
+    if(m_decVersion == DecVersion::Expanded){
+        if(input.isEmpty()){
+            input.append("0.");
+            for(int i = 0; i<m_dec; ++i)
+                input.append('0');
+            return;
+        }
+        if(digPointNum != -1){
         if(digPointNum == 0){
             if(inputSize==1){
                 input.clear();
@@ -101,10 +111,10 @@ void MyDoubleValidator::fixup(QString &input) const{
                 return;
             }else{
                 input.prepend('0');
+                ++digPointNum;
+                inputSize = input.size();
             }
         }
-        inputSize = input.size();
-        ++digPointNum;
         for(int j = 0; j < m_dec; ++j){
             if(digPointNum == inputSize-1-j){
                 for(int i = 0; i<m_dec-j;++i)
@@ -112,16 +122,26 @@ void MyDoubleValidator::fixup(QString &input) const{
                 return;
             }
         }
-    }else{
-        qDebug()<<input << buff;
-        input.append(".00");
-        //QLineEdit* lne = static_cast<QLineEdit*>(sender());
-
-        //static_cast<QLineEdit*>(sender())->setPlaceholderText(input);
+        }else{
+           input.append('.');
+           for(int i = 0; i<m_dec; ++i)
+               input.append('0');
+        }
+    }else{//Short Version
+        if(digPointNum != -1){
+            if(digPointNum == 0){
+                if(inputSize==1){
+                    input[0] = '0';
+                    return;
+                }else{
+                    input.prepend('0');
+                }
+            }
+        }
     }
 }
 
-char digitToCLocale(QChar in){
+static char digitToCLocale(QChar in){
     if(in.unicode() >= '0' && in.unicode() <= '9')
         return in.toLatin1();
     if(in == QLatin1Char('+'))
