@@ -1,5 +1,6 @@
 #include "mydoublevalidator.h"
 #include "limits"
+#include <math.h>
 
 #include <QDebug>
 #include <QLineEdit>
@@ -16,7 +17,7 @@ MyDoubleValidator::MyDoubleValidator(double bottom, double top, int decimals, QO
 static int numDigits(qlonglong n){
     if(n==0)
         return 1;
-    return (int)std::log10(double(n)) + 1;
+    return (int)std::log10(double(n)) + 1;    
 }
 
 static qlonglong pow10(int exp){

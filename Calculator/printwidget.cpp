@@ -119,9 +119,9 @@ void PrintWidget::drawDocum(QPainter* qp){
 }
 
 void PrintWidget::printText(){
-    QPrinter qPrinter = QPrinter();
+    QPrinter qPrinter;
 
-    QPrintDialog dlg = QPrintDialog(&qPrinter, this);
+    QPrintDialog dlg(&qPrinter, this);
     if(dlg.exec()){
         QPainter qp(&qPrinter);
         qp.setPen(QPen(Qt::black, 2));

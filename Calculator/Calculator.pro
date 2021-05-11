@@ -18,6 +18,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     mydoublevalidator.cpp \
+    myprintwidget.cpp \
+    myprintwidgettable.cpp \
     mytreeitem.cpp \
     mytreemodel.cpp \
     printwidget.cpp
@@ -31,6 +33,8 @@ HEADERS += \
     diritem.h \
     mainwindow.h \
     mydoublevalidator.h \
+    myprintwidget.h \
+    myprintwidgettable.h \
     mytreeitem.h \
     mytreemodel.h \
     printwidget.h

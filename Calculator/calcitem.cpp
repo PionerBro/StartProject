@@ -6,6 +6,7 @@
 #include "calcitem2delegate.h"
 #include "printwidget.h"
 #include "mydoublevalidator.h"
+#include "myprintwidget.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -229,8 +230,8 @@ void CalcItem::printSlot(){
            <<table->item(i,4)->data(Qt::DisplayRole).toString();
         data<<row;
     }
-    qDebug()<<data;
-    PrintWidget* print = new PrintWidget(data, this);
-    print->exec();
-    qDebug()<<"hello";
+    //PrintWidget* print = new PrintWidget(data, this);
+    //print->exec();
+    MyPrintWidget* print = new MyPrintWidget;
+    print->show();
 }
