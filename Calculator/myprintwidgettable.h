@@ -21,19 +21,26 @@ private:
         int row;
         int column;
     };
-    QList<URFuncItem> undoList;
-    QList<URFuncItem> redoList;
-    bool isURF;
+    QVector<URFuncItem> undoList;
+    QVector<URFuncItem> redoList;
+    bool isHandleEdit;                    //true: item edited by handle. false: item edit by undo or redo slots.
+    QVariant editBuffer;                  //use with undo and redo items.data.
 
-    QVariant buffer;
+    QVariant buffer;                      //use with copy and paste functions
     QMenu* menu;
 public slots:
     void copySlot();
     void pasteSlot();
     void propertiesSlot();
     void undoSlot();
+    void redoSlot();
+    void deleteSlot();
+    void addRow();
+    void addColumn();
 private slots:
     void slotCustomContextMenuRequested(QPoint);
+    void slotCellChanged(QTableWidgetItem*);
+    void setEditable(bool);
 };
 
 #endif // MYPRINTWIDGETTABLE_H
