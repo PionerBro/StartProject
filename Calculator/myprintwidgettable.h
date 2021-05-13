@@ -12,6 +12,8 @@ class MyPrintWidgetTable : public QTableWidget
     Q_OBJECT
 public:
     MyPrintWidgetTable(QWidget* parent = nullptr);
+
+    void clearBuffers();
 protected:
     virtual void keyPressEvent(QKeyEvent* event) override;
     virtual bool edit(const QModelIndex& index, QAbstractItemView::EditTrigger trigger, QEvent* event) override;

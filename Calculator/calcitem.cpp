@@ -8,6 +8,7 @@
 #include "mydoublevalidator.h"
 #include "myprintwidget.h"
 
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTableWidget>
@@ -232,6 +233,6 @@ void CalcItem::printSlot(){
     }
     //PrintWidget* print = new PrintWidget(data, this);
     //print->exec();
-    MyPrintWidget* print = new MyPrintWidget;
+    MyPrintWidget* print = new MyPrintWidget(data);
     print->show();
 }

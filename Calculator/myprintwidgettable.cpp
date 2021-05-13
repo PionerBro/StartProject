@@ -187,3 +187,10 @@ void MyPrintWidgetTable::setEditable(bool checked){
     else
         setEditTriggers(QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::AnyKeyPressed);
 }
+
+void MyPrintWidgetTable::clearBuffers(){
+    buffer.clear();
+    editBuffer.clear();
+    undoList.clear();
+    redoList.clear();
+}
