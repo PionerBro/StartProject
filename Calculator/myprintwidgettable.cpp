@@ -8,7 +8,7 @@
 
 #include <QDebug>
 
-MyPrintWidgetTable::MyPrintWidgetTable(QWidget* parent):QTableWidget(100,30,parent), editBuffer(QVariant())
+MyPrintWidgetTable::MyPrintWidgetTable(QWidget* parent):QTableWidget(100,30,parent), editBuffer(QVariant()), lastEditColumn(-1), lastEditRow(-1)
 {
     setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -23,19 +23,25 @@ MyPrintWidgetTable::MyPrintWidgetTable(QWidget* parent):QTableWidget(100,30,pare
     QAction* copyAct = new QAction(tr("Копировать"),this);
     QAction* pasteAct = new QAction(tr("Вставить"),this);
     QAction* rowInsAct = new QAction(tr("Вставить строку"),this);
+    QAction* rowDelAct = new QAction(tr("Удалить строку"),this);
     QAction* columnInsAct = new QAction(tr("Вставить столбец"),this);
+    QAction* columnDelAct = new QAction(tr("Удалить столбец"), this);
     QAction* propertiesAct = new QAction(tr("Свойства ячейки"), this);
     copyAct->setShortcut(Qt::CTRL|Qt::Key_C);
     pasteAct->setShortcut(Qt::CTRL|Qt::Key_V);
     connect(copyAct, SIGNAL(triggered()), this, SLOT(copySlot()));
     connect(pasteAct, SIGNAL(triggered()), this, SLOT(pasteSlot()));
-    connect(rowInsAct, SIGNAL(triggered()), this, SLOT(addRow()));
-    connect(columnInsAct, SIGNAL(triggered()), this, SLOT(addColumn()));
+    connect(rowInsAct, SIGNAL(triggered()), this, SLOT(addRowSlot()));
+    connect(columnInsAct, SIGNAL(triggered()), this, SLOT(addColumnSlot()));
+    connect(rowDelAct, SIGNAL(triggered()), this, SLOT(deleteRowSlot()));
+    connect(columnDelAct, SIGNAL(triggered()), this, SLOT(deleteColumnSlot()));
     connect(propertiesAct, SIGNAL(triggered()), this, SLOT(propertiesSlot()));
     menu->addAction(copyAct);
     menu->addAction(pasteAct);
     menu->addAction(rowInsAct);
+    menu->addAction(rowDelAct);
     menu->addAction(columnInsAct);
+    menu->addAction(columnDelAct);
     menu->addAction(propertiesAct);
     //QHeaderView* view = new QHeaderView(Qt::Horizontal, this);
     //setHorizontalHeader(view);
@@ -99,39 +105,81 @@ bool MyPrintWidgetTable::edit(const QModelIndex& index, QAbstractItemView::EditT
 
 void MyPrintWidgetTable::undoSlot(){
     if(!undoList.isEmpty()){
-        isHandleEdit = false;
         URFuncItem undoItem = undoList.takeLast();
         URFuncItem redoItem;
-        QTableWidgetItem* itemT = item(undoItem.row, undoItem.column);
-        if(itemT)
-            redoItem.data = itemT->data(Qt::EditRole);
-        else
-            redoItem.data = QVariant();
-        redoItem.row = undoItem.row;
-        redoItem.column = undoItem.column;
+        if(undoItem.type == URFType::Edit){
+            isHandleEdit = false;
+            QTableWidgetItem* itemT = item(undoItem.row, undoItem.column);
+            if(itemT)
+                redoItem.data = itemT->data(Qt::EditRole);
+            else
+                redoItem.data = QVariant();
+            redoItem.type = undoItem.type;
+            redoItem.row = undoItem.row;
+            redoItem.column = undoItem.column;
+            itemT = new QTableWidgetItem;
+            itemT->setData(Qt::EditRole, undoItem.data);
+            setItem(undoItem.row, undoItem.column, itemT);
+            if(undoItem.lEditRow == lastEditRow)
+                lastEditRow = (undoList.isEmpty() ? -1 : undoList.last().lEditRow);
+            if(undoItem.lEditColumn == lastEditColumn)
+                lastEditColumn = (undoList.isEmpty() ? -1 : undoList.last().lEditColumn);
+        }else if(undoItem.type == URFType::InsertRow){
+            redoItem.row = undoItem.row;
+            redoItem.type = URFType::DeleteRow;
+            deleteRow(undoItem.row);
+        }else if (undoItem.type == URFType::InsertColumn) {
+            redoItem.column = undoItem.column;
+            redoItem.type = URFType::DeleteColumn;
+            deleteColumn(undoItem.column);
+        }else if(undoItem.type == URFType::DeleteRow){
+            redoItem.row = undoItem.row;
+            redoItem.type = URFType::InsertRow;
+            addRow(undoItem.row);
+        }else if(undoItem.type == URFType::DeleteColumn){
+            redoItem.column = undoItem.column;
+            redoItem.type = URFType::InsertColumn;
+            addColumn(undoItem.column);
+        }
         redoList<<redoItem;
-        itemT = new QTableWidgetItem;
-        itemT->setData(Qt::EditRole, undoItem.data);
-        setItem(undoItem.row, undoItem.column, itemT);
     }
 }
 
 void MyPrintWidgetTable::redoSlot(){
     if(!redoList.isEmpty()){
-        isHandleEdit = false;
         URFuncItem redoItem = redoList.takeLast();
         URFuncItem undoItem;
-        QTableWidgetItem* itemT = item(redoItem.row, redoItem.column);
-        if(itemT)
-            undoItem.data = itemT->data(Qt::EditRole);
-        else
-            undoItem.data = QVariant();
-        undoItem.row = redoItem.row;
-        undoItem.column = redoItem.column;
+        if(redoItem.type == URFType::Edit){
+            isHandleEdit = false;
+            QTableWidgetItem* itemT = item(redoItem.row, redoItem.column);
+            if(itemT)
+                undoItem.data = itemT->data(Qt::EditRole);
+            else
+                undoItem.data = QVariant();
+            undoItem.type = redoItem.type;
+            undoItem.row = redoItem.row;
+            undoItem.column = redoItem.column;
+            itemT = new QTableWidgetItem;
+            itemT->setData(Qt::EditRole, redoItem.data);
+            setItem(redoItem.row, redoItem.column, itemT);
+        }else if(redoItem.type == URFType::InsertRow){
+            undoItem.row = redoItem.row;
+            undoItem.type = URFType::DeleteRow;
+            deleteRow(redoItem.row);
+        }else if (redoItem.type == URFType::InsertColumn) {
+            undoItem.column = redoItem.column;
+            undoItem.type = URFType::DeleteColumn;
+            deleteColumn(redoItem.column);
+        }else if(redoItem.type == URFType::DeleteRow){
+            undoItem.row = redoItem.row;
+            undoItem.type = URFType::InsertRow;
+            addRow(redoItem.row);
+        }else if(redoItem.type == URFType::DeleteColumn){
+            undoItem.column = redoItem.column;
+            undoItem.type = URFType::InsertColumn;
+            addColumn(redoItem.column);
+        }
         undoList<<undoItem;
-        itemT = new QTableWidgetItem;
-        itemT->setData(Qt::EditRole, redoItem.data);
-        setItem(redoItem.row, redoItem.column, itemT);
     }
 }
 
@@ -148,37 +196,127 @@ void MyPrintWidgetTable::deleteSlot(){
 
 }
 
-void MyPrintWidgetTable::addRow(){
-    int row = currentRow();
+void MyPrintWidgetTable::addRow(int row){
     insertRow(row);
     for (int i = 0; i<undoList.count(); ++i) {
-        if(undoList[i].row >= row)
+        if(undoList[i].row > row)
             ++undoList[i].row;
     }
     for (int i = 0; i<redoList.count(); ++i) {
-        if(redoList[i].row >= row)
+        if(redoList[i].row > row)
             ++redoList[i].row;
+    }
+
+}
+
+void MyPrintWidgetTable::addRowSlot(){
+    int row = currentRow();
+    addRow(row);
+    URFuncItem item;
+    item.type = URFType::InsertRow;
+    item.row = row;
+    undoList<<item;
+    if(lastEditRow >= row)
+        ++lastEditRow;
+    if(!redoList.isEmpty())
+        redoList.clear();
+}
+
+void MyPrintWidgetTable::deleteRow(int row){
+    removeRow(row);
+    for (int i = 0; i<undoList.count(); ++i) {
+        if(undoList[i].row > row)
+            --undoList[i].row;
+    }
+    for (int i = 0; i<redoList.count(); ++i) {
+        if(redoList[i].row > row)
+            --redoList[i].row;
     }
 }
 
-void MyPrintWidgetTable::addColumn(){
+void MyPrintWidgetTable::deleteRowSlot(){
+    int row = currentRow();
+    deleteRow(row);
+    URFuncItem item;
+    item.type = URFType::DeleteRow;
+    item.row = row;
+    undoList<<item;
+    if(lastEditRow >= row)
+        --lastEditRow;
+    if(!redoList.isEmpty())
+        redoList.clear();
+}
 
+void MyPrintWidgetTable::addColumn(int column){
+    insertColumn(column);
+    for (int i = 0; i<undoList.count(); ++i) {
+        if(undoList[i].column > column)
+            ++undoList[i].column;
+    }
+    for (int i = 0; i<redoList.count(); ++i) {
+        if(redoList[i].column > column)
+            ++redoList[i].column;
+    }
+}
+
+void MyPrintWidgetTable::addColumnSlot(){
+    int column = currentColumn();
+    addColumn(column);
+    URFuncItem item;
+    item.type = URFType::InsertColumn;
+    item.column = column;
+    undoList<<item;
+    if(lastEditColumn >= column)
+        ++lastEditColumn;
+    if(!redoList.isEmpty())
+        redoList.clear();
+}
+
+void MyPrintWidgetTable::deleteColumn(int column){
+    removeColumn(column);
+    for (int i = 0; i<undoList.count(); ++i) {
+        if(undoList[i].column > column)
+            --undoList[i].column;
+    }
+    for (int i = 0; i<redoList.count(); ++i) {
+        if(redoList[i].column > column)
+            --redoList[i].column;
+    }
+}
+
+void MyPrintWidgetTable::deleteColumnSlot(){
+    int column = currentColumn();
+    deleteColumn(column);
+    URFuncItem item;
+    item.type = URFType::DeleteColumn;
+    item.column = column;
+    undoList<<item;
+    if(lastEditColumn >= column)
+        --lastEditColumn;
+    if(!redoList.isEmpty())
+        redoList.clear();
 }
 
 void MyPrintWidgetTable::slotCellChanged(QTableWidgetItem* itemT){
-    if(isHandleEdit){
-        if(itemT){
+    if(itemT){
+        lastEditRow = (itemT->row() > lastEditRow ? itemT->row() : lastEditRow);
+        lastEditColumn = (itemT->column() > lastEditColumn ? itemT->column() : lastEditColumn);
+        if(isHandleEdit){
                 URFuncItem item;
                 item.data = editBuffer;
                 item.row = itemT->row();
                 item.column = itemT->column();
+                item.type = URFType::Edit;
+                item.lEditRow = lastEditRow;
+                item.lEditColumn = lastEditColumn;
                 undoList<<item;
+                if(!redoList.isEmpty())
+                    redoList.clear();
         }
-        if(!redoList.isEmpty())
-            redoList.clear();
     }
     qDebug()<<"cell changed";
-    qDebug()<<undoList.count();
+    qDebug()<<lastEditRow<<lastEditColumn;
+
 }
 
 void MyPrintWidgetTable::setEditable(bool checked){
@@ -194,3 +332,4 @@ void MyPrintWidgetTable::clearBuffers(){
     undoList.clear();
     redoList.clear();
 }
+

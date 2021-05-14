@@ -23,6 +23,9 @@ MyPrintWidget::MyPrintWidget(const QList<QStringList>& data, QWidget *parent) : 
     QVBoxLayout* vbx = new QVBoxLayout(this);
     tableView = new MyPrintWidgetTable(this);
     tableView->setItemDelegate(new MyPrintWidgetDelegate);
+    tableView->horizontalHeader()->setHidden(true);
+    tableView->verticalHeader()->setHidden(true);
+    tableView->setShowGrid(false);
     vbx->addWidget(tableView);
     QToolBar* toolBar = new QToolBar(this);
     vbx->addWidget(toolBar);
@@ -31,16 +34,22 @@ MyPrintWidget::MyPrintWidget(const QList<QStringList>& data, QWidget *parent) : 
     QAction* printAct = new QAction("Print", this);
     viewAct->setCheckable(true);
     gridAct->setCheckable(true);
-    gridAct->setChecked(true);
+    //gridAct->setChecked(true);
     toolBar->addAction(viewAct);
     toolBar->addAction(gridAct);
     toolBar->addAction(printAct);
     connect(viewAct, SIGNAL(toggled(bool)), tableView, SLOT(setEditable(bool)));
-    connect(gridAct, SIGNAL(toggled(bool)), tableView, SLOT(setShowGrid(bool)));
+    connect(gridAct, SIGNAL(toggled(bool)), this, SLOT(gridSlot(bool)));
     connect(printAct, SIGNAL(triggered()), this, SLOT(printDoc()));
     setupPrintList(data);
     tableView->clearBuffers();
 
+}
+
+void MyPrintWidget::gridSlot(bool checked){
+    tableView->horizontalHeader()->setHidden(!checked);
+    tableView->verticalHeader()->setHidden(!checked);
+    tableView->setShowGrid(checked);
 }
 
 void MyPrintWidget::setupPrintList(const QList<QStringList>& data){
@@ -152,7 +161,7 @@ void MyPrintWidget::printDoc(){
         pageWidth -= tableView->verticalHeader()->width();
 
         QList <QRect> hPages;
-        QVector <QList <QRect> > pages;
+        QVector<QVector<QRect>> pages;
 
         QList <int> rightColumn;
         QList <int> bottomRow;
@@ -188,7 +197,7 @@ void MyPrintWidget::printDoc(){
         for(; v < 30; v++)
         {
             logicalIndex = tableView->verticalHeader()->logicalIndex(v);
-            if(!tableView->verticalHeader()->isSectionHidden(logicalIndex) && tableView->item(logicalIndex,1)->checkState())
+            if(!tableView->verticalHeader()->isSectionHidden(logicalIndex))
             {
                 if(pageHeight >= currentPageHeight + tableView->verticalHeader()->sectionSize(logicalIndex))
                 {
@@ -246,8 +255,8 @@ void MyPrintWidget::printDoc(){
         QColor color = QColor(Qt::lightGray);
         QBrush brush(color);
         QFont font;
-        int horizontalHeaderAlign = tableView->horizontalHeaderItem(0)->textAlignment() | Qt::TextWordWrap;
-        int tableAlign = tableView->item(0,0)->textAlignment() | Qt::TextWordWrap;
+        int horizontalHeaderAlign = Qt::AlignRight|Qt::AlignBottom;
+        int tableAlign = Qt::AlignLeft|Qt::AlignBottom;
 
         for(int p = 0; p < pages.count(); p++)
         {
@@ -256,7 +265,7 @@ void MyPrintWidget::printDoc(){
 
                 /// рисуем заголовок
 
-                font = tableView->horizontalHeader()->font();
+/*                font = tableView->horizontalHeader()->font();
                 painter.setFont(font);
 
                 //Сначала нарисуем порядковый номер
@@ -285,7 +294,7 @@ void MyPrintWidget::printDoc(){
                 }
                 painter.translate(-translateWidth,tableView->horizontalHeader()->height());
                 translateWidth = 0;
-
+*/
 
                 /// рисуем данные
 
@@ -295,7 +304,7 @@ void MyPrintWidget::printDoc(){
                 for(int v = pages.at(p).at(hP).top(); v <= pages.at(p).at(hP).bottom(); v++)
                 {
                     logicalIndexV = tableView->verticalHeader()->logicalIndex(v);
-                    if(!tableView->verticalHeader()->isSectionHidden(logicalIndexV) && tableView->item(logicalIndexV,1)->checkState())
+                    if(!tableView->verticalHeader()->isSectionHidden(logicalIndexV))
                     {
                         // рисуем порядковый номер
                         currentSectionWidth = tableView->verticalHeader()->width();
@@ -318,8 +327,10 @@ void MyPrintWidget::printDoc(){
                             {
                                 currentSectionWidth = tableView->horizontalHeader()->sectionSize(logicalIndexH);
                                 painter.drawRect(0,0,currentSectionWidth,currentSectionHeight);
-                                painter.drawText(2,2,currentSectionWidth-4,currentSectionHeight-4,tableAlign,
+                                if(tableView->item(logicalIndexV,logicalIndexH)){
+                                    painter.drawText(2,2,currentSectionWidth-4,currentSectionHeight-4,tableAlign,
                                                      tableView->item(logicalIndexV,logicalIndexH)->text());
+                                }
                                 painter.translate(currentSectionWidth,0);
                                 translateWidth += currentSectionWidth;
                             }

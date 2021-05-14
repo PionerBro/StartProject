@@ -17,6 +17,7 @@ private:
     QTableWidgetItem* setupTableItem(const QVariant& data, bool border = false, Qt::Alignment align = Qt::AlignBottom, QFont font = QFont("TimesNewRoman", 12));
 private slots:
     void printDoc();
+    void gridSlot(bool);
 signals:
 
 };
