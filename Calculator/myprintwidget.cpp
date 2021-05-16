@@ -161,7 +161,7 @@ void MyPrintWidget::printDoc(){
         pageWidth -= tableView->verticalHeader()->width();
 
         QList <QRect> hPages;
-        QVector<QVector<QRect>> pages;
+        QVector<QList<QRect>> pages;
 
         QList <int> rightColumn;
         QList <int> bottomRow;
@@ -173,7 +173,7 @@ void MyPrintWidget::printDoc(){
         int logicalIndex = 0;
         int h = 0;
 
-        for(; h < 5; ++h)
+        for(; h <= tableView->getLastEditColumn().y(); ++h)
         {
             logicalIndex =tableView->horizontalHeader()->logicalIndex(h);
             if(!tableView->horizontalHeader()->isSectionHidden(logicalIndex))
@@ -194,7 +194,7 @@ void MyPrintWidget::printDoc(){
 
 
         int v = 0;
-        for(; v < 30; v++)
+        for(; v <= tableView->getLastEditRow().x(); v++)
         {
             logicalIndex = tableView->verticalHeader()->logicalIndex(v);
             if(!tableView->verticalHeader()->isSectionHidden(logicalIndex))

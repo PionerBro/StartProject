@@ -12,6 +12,7 @@
 
 #include <QDebug>
 
+
 DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(parent, f)
 {
     setAttribute(Qt::WA_DeleteOnClose);
@@ -45,9 +46,11 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     vbx->addWidget(view);
     QList<QVariant> header;
     header<<"Num"
-           <<"Name"
+           <<"Parent"
            <<"Folder"
-           <<"Parent";
+           <<"Name"
+           <<"Unit"
+           <<"Price";
     model = new MyTreeModel(header, this);
     view->setModel(model);
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
@@ -60,19 +63,23 @@ DirectoryWidget::~DirectoryWidget(){
 
 void DirectoryWidget::viewSettings(){
     view->setSelectionMode(QAbstractItemView::SingleSelection);
-    view->setColumnHidden(0,true);
-    view->setColumnHidden(2,true);
-    view->setColumnHidden(3,true);
+    //view->setColumnHidden(0,true);
+    //view->setColumnHidden(2,true);
+    //view->setColumnHidden(3,true);
     view->resizeColumnsToContents();
     view->horizontalHeader()->setStretchLastSection(true);
     view->setCurrentIndex(model->index(0,1,QModelIndex()));
 }
 
 void DirectoryWidget::createItem(){
-    DirItem* item = new DirItem(this);
-    if(item->exec())
+    QList<QVariant> data;
+    MyTreeItem* itemP = model->currentRoot();
+    DirItem* item = new DirItem(itemP->data(2).toLongLong(), data, this);
+    if(item->exec()){
         qDebug()<<"Item created";
-    else
+        model->createItem(itemP, data);
+        qDebug()<<data;
+    }else
         qDebug()<<"Item not created";
 }
 
@@ -80,7 +87,8 @@ void DirectoryWidget::editItem(){
     QModelIndex index = view->currentIndex();
     if(index.isValid()){
         MyTreeItem* tItem = static_cast<MyTreeItem*>(index.internalPointer());
-        DirItem* item = new DirItem(tItem->rowData(), this);
+        QList<QVariant> data = tItem->rowData();
+        DirItem* item = new DirItem(data, this);
         if(item->exec())
             qDebug()<<"Item changed";
         else

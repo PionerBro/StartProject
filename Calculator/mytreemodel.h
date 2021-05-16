@@ -20,6 +20,8 @@ public:
     QModelIndex parent(const QModelIndex &index)const override;
     int rowCount(const QModelIndex &parent = QModelIndex())const override;
     int columnCount(const QModelIndex &parent = QModelIndex())const override;
+    MyTreeItem* currentRoot()const ;
+    bool createItem(MyTreeItem* , QList<QVariant>&);
 private:
     void setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent);
 

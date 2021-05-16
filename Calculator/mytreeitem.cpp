@@ -2,9 +2,9 @@
 #include <QDebug>
 
 static bool compare(const MyTreeItem* first, const MyTreeItem* second){
-    if(first->data(1).toString()<second->data(1).toString())
+    if(first->data(3).toString()<second->data(3).toString())
         return true;
-    else if(first->data(1).toString()>second->data(1).toString())
+    else if(first->data(3).toString()>second->data(3).toString())
         return false;
     else
         return true;

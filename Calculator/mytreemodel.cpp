@@ -1,6 +1,10 @@
 #include "mytreemodel.h"
 #include "mytreeitem.h"
+#include "mydatabase.h"
+
 #include <QDebug>
+
+extern MyDataBase db;
 
 MyTreeModel::MyTreeModel(const QList<QVariant> &data, QObject* parent):QAbstractItemModel(parent)
 {
@@ -25,9 +29,9 @@ MyTreeModel::MyTreeModel(const QList<QVariant> &data, QObject* parent):QAbstract
         root->appendChild(item);
     }
     */
-    QList<QVariant> tmp;
+    //QList<QVariant> tmp;
     QList<QList<QVariant>> list;
-    for(int i = 1; i < 10; ++i){
+    /*for(int i = 1; i < 10; ++i){
         tmp<< i <<"item " + QString::number(i)<< 0 << 0;
         list << tmp;
         tmp.clear();
@@ -64,9 +68,9 @@ MyTreeModel::MyTreeModel(const QList<QVariant> &data, QObject* parent):QAbstract
     tmp.clear();
     tmp<< 20 <<"item13" << 0 << 4;
     list<<tmp;
-    tmp.clear();
+    tmp.clear();*/
 
-
+    db.select(list);
     setupModelData(list, root);
 }
 
@@ -155,7 +159,7 @@ void MyTreeModel::setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem
     folders<<parent;
     for(int i = 0; i<lines.count(); ++i){
         QList<QVariant> tmp = lines.value(i);
-        int fNum = tmp.value(3).toInt();
+        int fNum = tmp.value(1).toInt();
         MyTreeItem* item = new MyTreeItem(tmp,folders[fNum]);
         folders[fNum]->appendChild(item);
         if(tmp.value(2).toInt()){
@@ -170,7 +174,6 @@ void MyTreeModel::setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem
     for(int i = 1; i<folders.count();++i){
         folders[i]->sortItem();
     }
-
     rootItem = parent;
 }
 
@@ -187,8 +190,26 @@ void MyTreeModel::rootItemChanged(QModelIndex index){
     }else{
         QList<QVariant> data;
         data = item->rowData();
-        qDebug()<<data;
         emit sendData(data);
     }
     endResetModel();
+}
+
+MyTreeItem* MyTreeModel::currentRoot() const{
+    return rootItem;
+}
+
+bool MyTreeModel::createItem(MyTreeItem *itemP, QList<QVariant> &data){
+    beginResetModel();
+    if(!db.insertIntoTable(data))
+        return false;
+    qlonglong num = db.getLastNumNumber();
+    if(num==-1)
+        return false;
+    data[0] = num;
+    MyTreeItem* newItem = new MyTreeItem(data, itemP);
+    itemP->appendChild(newItem);
+    itemP->sortItem();
+    endResetModel();
+    return true;
 }

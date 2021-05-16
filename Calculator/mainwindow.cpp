@@ -12,13 +12,17 @@
 #include <QAction>
 #include "directorywidget.h"
 #include "calcitem.h"
+#include "mydatabase.h"
 
 #include <QDebug>
 
+MyDataBase db;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    if(!db.createConnection())
+        exit(-1);
     QWidget* widget = new QWidget(this);
     QToolBar* tool = new QToolBar("mew", widget);
     QAction* act = new QAction("New", tool);

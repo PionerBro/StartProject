@@ -8,7 +8,7 @@
 
 #include <QDebug>
 
-MyPrintWidgetTable::MyPrintWidgetTable(QWidget* parent):QTableWidget(100,30,parent), editBuffer(QVariant()), lastEditColumn(-1), lastEditRow(-1)
+MyPrintWidgetTable::MyPrintWidgetTable(QWidget* parent):QTableWidget(100,30,parent), editBuffer(QVariant()), lastEditColumn(-1,-1), lastEditRow(-1,-1)
 {
     setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -110,20 +110,23 @@ void MyPrintWidgetTable::undoSlot(){
         if(undoItem.type == URFType::Edit){
             isHandleEdit = false;
             QTableWidgetItem* itemT = item(undoItem.row, undoItem.column);
-            if(itemT)
-                redoItem.data = itemT->data(Qt::EditRole);
-            else
-                redoItem.data = QVariant();
+            redoItem.data = (itemT) ? itemT->data(Qt::EditRole) : QVariant();
             redoItem.type = undoItem.type;
             redoItem.row = undoItem.row;
             redoItem.column = undoItem.column;
-            itemT = new QTableWidgetItem;
-            itemT->setData(Qt::EditRole, undoItem.data);
-            setItem(undoItem.row, undoItem.column, itemT);
-            if(undoItem.lEditRow == lastEditRow)
-                lastEditRow = (undoList.isEmpty() ? -1 : undoList.last().lEditRow);
-            if(undoItem.lEditColumn == lastEditColumn)
-                lastEditColumn = (undoList.isEmpty() ? -1 : undoList.last().lEditColumn);
+            redoItem.lEditRow = undoItem.lEditRow;
+            redoItem.lEditColumn = undoItem.lEditColumn;
+            if(undoItem.data==QVariant()){
+                deleteItem(undoItem.row, undoItem.column);
+            }else{
+                itemT = new QTableWidgetItem;
+                itemT->setData(Qt::EditRole, undoItem.data);
+                setItem(undoItem.row, undoItem.column, itemT);
+            }
+            //if(undoItem.lEditRow == lastEditRow)
+              //  lastEditRow = (undoList.isEmpty() ? QPoint(-1,-1) : undoList.last().lEditRow);
+            //if(undoItem.lEditColumn == lastEditColumn)
+              //  lastEditColumn = (undoList.isEmpty() ? QPoint(-1,-1) : undoList.last().lEditColumn);
         }else if(undoItem.type == URFType::InsertRow){
             redoItem.row = undoItem.row;
             redoItem.type = URFType::DeleteRow;
@@ -152,16 +155,19 @@ void MyPrintWidgetTable::redoSlot(){
         if(redoItem.type == URFType::Edit){
             isHandleEdit = false;
             QTableWidgetItem* itemT = item(redoItem.row, redoItem.column);
-            if(itemT)
-                undoItem.data = itemT->data(Qt::EditRole);
-            else
-                undoItem.data = QVariant();
+            undoItem.data = (itemT) ? itemT->data(Qt::EditRole) : QVariant();
             undoItem.type = redoItem.type;
             undoItem.row = redoItem.row;
             undoItem.column = redoItem.column;
-            itemT = new QTableWidgetItem;
-            itemT->setData(Qt::EditRole, redoItem.data);
-            setItem(redoItem.row, redoItem.column, itemT);
+            undoItem.lEditRow = lastEditRow;
+            undoItem.lEditColumn = lastEditColumn;
+            if(redoItem.data == QVariant()){
+                deleteItem(redoItem.row, redoItem.column);
+            }else{
+                itemT = new QTableWidgetItem;
+                itemT->setData(Qt::EditRole, redoItem.data);
+                setItem(redoItem.row, redoItem.column, itemT);
+            }
         }else if(redoItem.type == URFType::InsertRow){
             undoItem.row = redoItem.row;
             undoItem.type = URFType::DeleteRow;
@@ -183,30 +189,72 @@ void MyPrintWidgetTable::redoSlot(){
     }
 }
 
+void MyPrintWidgetTable::deleteItem(int cRow, int cColumn){
+    QTableWidgetItem* item = takeItem(cRow, cColumn);
+    delete item;
+    if(lastEditRow == QPoint(cRow, cColumn)){
+        bool isFind = false;
+        for(int row = lastEditRow.x(); row >= 0; --row){
+            for(int column = lastEditColumn.y(); column >= 0; --column){
+                if(this->item(row, column)){
+                    lastEditRow = QPoint(row, column);
+                    isFind = true;
+                    break;
+                }
+            }
+            if(isFind)
+                break;
+        }
+        if(!isFind)
+            lastEditRow = QPoint(-1, -1);
+    }
+    if(lastEditColumn == QPoint(cRow, cColumn)){
+        bool isFind = false;
+        for (int column = lastEditColumn.y(); column >= 0; --column) {
+            for(int row = lastEditRow.x(); row >=0; --row){
+                if(this->item(row,column)){
+                    lastEditColumn = QPoint(row, column);
+                    isFind = true;
+                    break;
+                }
+            }
+            if(isFind)
+                break;
+        }
+        if(!isFind)
+            lastEditColumn = QPoint(-1, -1);
+    }
+}
+
 void MyPrintWidgetTable::deleteSlot(){
+    int cRow = currentRow();
+    int cColumn = currentColumn();
+    QTableWidgetItem* item = this->item(cRow,cColumn);
     if(currentItem()){
-        QTableWidgetItem* item = takeItem(currentRow(),currentColumn());
         URFuncItem undoItem;
         undoItem.data = item->data(Qt::EditRole);
-        undoItem.row = currentRow();
-        undoItem.column = currentColumn();
+        undoItem.row = cRow;
+        undoItem.column = cColumn;
+        undoItem.type = URFType::Edit;
+        undoItem.lEditRow = lastEditRow;
+        undoItem.lEditColumn = lastEditColumn;
         undoList<<undoItem;
-        delete item;
+        deleteItem(cRow,cColumn);
     }
-
 }
 
 void MyPrintWidgetTable::addRow(int row){
     insertRow(row);
-    for (int i = 0; i<undoList.count(); ++i) {
+/*    for (int i = 0; i<undoList.count(); ++i) {
         if(undoList[i].row > row)
             ++undoList[i].row;
     }
     for (int i = 0; i<redoList.count(); ++i) {
         if(redoList[i].row > row)
             ++redoList[i].row;
-    }
-
+    }*/
+    if(lastEditRow.x() >= row)
+        ++lastEditRow.rx();
 }
 
 void MyPrintWidgetTable::addRowSlot(){
@@ -216,21 +264,53 @@ void MyPrintWidgetTable::addRowSlot(){
     item.type = URFType::InsertRow;
     item.row = row;
     undoList<<item;
-    if(lastEditRow >= row)
-        ++lastEditRow;
     if(!redoList.isEmpty())
         redoList.clear();
 }
 
 void MyPrintWidgetTable::deleteRow(int row){
     removeRow(row);
-    for (int i = 0; i<undoList.count(); ++i) {
+/*    for (int i = 0; i<undoList.count(); ++i) {
         if(undoList[i].row > row)
             --undoList[i].row;
     }
     for (int i = 0; i<redoList.count(); ++i) {
         if(redoList[i].row > row)
             --redoList[i].row;
+    }*/
+    if(lastEditRow.x() > row)
+        --lastEditRow.rx();
+    else if(lastEditRow.x() == row){
+        bool isFind = false;
+        for(int row = lastEditRow.x(); row >= 0; --row){
+            for(int column = lastEditColumn.y(); column >= 0; --column){
+                if(this->item(row, column)){
+                    lastEditRow = QPoint(row, column);
+                    isFind = true;
+                    break;
+                }
+            }
+            if(isFind)
+                break;
+        }
+        if(!isFind)
+            lastEditRow = QPoint(-1, -1);
+    }
+    if(lastEditColumn.x() == row){
+        bool isFind = false;
+        for (int column = lastEditColumn.y(); column >= 0; --column) {
+            for(int row = lastEditRow.x(); row >=0; --row){
+                if(this->item(row,column)){
+                    lastEditColumn = QPoint(row, column);
+                    isFind = true;
+                    break;
+                }
+            }
+            if(isFind)
+                break;
+        }
+        if(!isFind)
+            lastEditColumn = QPoint(-1, -1);
     }
 }
 
@@ -241,22 +321,22 @@ void MyPrintWidgetTable::deleteRowSlot(){
     item.type = URFType::DeleteRow;
     item.row = row;
     undoList<<item;
-    if(lastEditRow >= row)
-        --lastEditRow;
     if(!redoList.isEmpty())
         redoList.clear();
 }
 
 void MyPrintWidgetTable::addColumn(int column){
     insertColumn(column);
-    for (int i = 0; i<undoList.count(); ++i) {
+/*    for (int i = 0; i<undoList.count(); ++i) {
         if(undoList[i].column > column)
             ++undoList[i].column;
     }
     for (int i = 0; i<redoList.count(); ++i) {
         if(redoList[i].column > column)
             ++redoList[i].column;
-    }
+    }*/
+    if(lastEditColumn.y() >= column)
+        ++lastEditColumn.ry();
 }
 
 void MyPrintWidgetTable::addColumnSlot(){
@@ -266,21 +346,53 @@ void MyPrintWidgetTable::addColumnSlot(){
     item.type = URFType::InsertColumn;
     item.column = column;
     undoList<<item;
-    if(lastEditColumn >= column)
-        ++lastEditColumn;
     if(!redoList.isEmpty())
         redoList.clear();
 }
 
 void MyPrintWidgetTable::deleteColumn(int column){
     removeColumn(column);
-    for (int i = 0; i<undoList.count(); ++i) {
+/*    for (int i = 0; i<undoList.count(); ++i) {
         if(undoList[i].column > column)
             --undoList[i].column;
     }
     for (int i = 0; i<redoList.count(); ++i) {
         if(redoList[i].column > column)
             --redoList[i].column;
+    }*/
+    if(lastEditColumn.y() > column)
+        --lastEditColumn.ry();
+    else if(lastEditColumn.y() == column){
+        bool isFind = false;
+        for (int column = lastEditColumn.y(); column >= 0; --column) {
+            for(int row = lastEditRow.x(); row >=0; --row){
+                if(this->item(row,column)){
+                    lastEditColumn = QPoint(row, column);
+                    isFind = true;
+                    break;
+                }
+            }
+            if(isFind)
+                break;
+        }
+        if(!isFind)
+            lastEditColumn = QPoint(-1, -1);
+    }
+    if(lastEditRow.y() == column){
+        bool isFind = false;
+        for(int row = lastEditRow.x(); row >= 0; --row){
+            for(int column = lastEditColumn.y(); column >= 0; --column){
+                if(this->item(row, column)){
+                    lastEditRow = QPoint(row, column);
+                    isFind = true;
+                    break;
+                }
+            }
+            if(isFind)
+                break;
+        }
+        if(!isFind)
+            lastEditRow = QPoint(-1, -1);
     }
 }
 
@@ -291,16 +403,14 @@ void MyPrintWidgetTable::deleteColumnSlot(){
     item.type = URFType::DeleteColumn;
     item.column = column;
     undoList<<item;
-    if(lastEditColumn >= column)
-        --lastEditColumn;
     if(!redoList.isEmpty())
         redoList.clear();
 }
 
 void MyPrintWidgetTable::slotCellChanged(QTableWidgetItem* itemT){
     if(itemT){
-        lastEditRow = (itemT->row() > lastEditRow ? itemT->row() : lastEditRow);
-        lastEditColumn = (itemT->column() > lastEditColumn ? itemT->column() : lastEditColumn);
+        lastEditRow = (itemT->row() > lastEditRow.x() ? QPoint(itemT->row(),itemT->column()) : lastEditRow);
+        lastEditColumn = (itemT->column() > lastEditColumn.y() ? QPoint(itemT->row(), itemT->column()) : lastEditColumn);
         if(isHandleEdit){
                 URFuncItem item;
                 item.data = editBuffer;
@@ -333,3 +443,10 @@ void MyPrintWidgetTable::clearBuffers(){
     redoList.clear();
 }
 
+QPoint MyPrintWidgetTable::getLastEditRow() const{
+    return lastEditRow;
+}
+
+QPoint MyPrintWidgetTable::getLastEditColumn() const{
+    return lastEditColumn;
+}

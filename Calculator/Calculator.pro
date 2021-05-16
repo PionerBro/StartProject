@@ -17,6 +17,7 @@ SOURCES += \
     diritem.cpp \
     main.cpp \
     mainwindow.cpp \
+    mydatabase.cpp \
     mydoublevalidator.cpp \
     myprintwidget.cpp \
     myprintwidgetdelegate.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     directorywidget.h \
     diritem.h \
     mainwindow.h \
+    mydatabase.h \
     mydoublevalidator.h \
     myprintwidget.h \
     myprintwidgetdelegate.h \

@@ -22,6 +22,8 @@ public:
 
     MyPrintWidgetTable(QWidget* parent = nullptr);
 
+    QPoint getLastEditRow() const;
+    QPoint getLastEditColumn() const;
     void clearBuffers();
 protected:
     virtual void keyPressEvent(QKeyEvent* event) override;
@@ -32,8 +34,8 @@ private:
 
         URFType type;
         QVariant data;
-        int lEditRow;
-        int lEditColumn;
+        QPoint lEditRow;
+        QPoint lEditColumn;
         int row;
         int column;
     };
@@ -43,8 +45,8 @@ private:
     bool isInsDelOp;
     QVariant editBuffer;                  //use with undo and redo items.data.
 
-    int lastEditColumn;
-    int lastEditRow;
+    QPoint lastEditColumn;
+    QPoint lastEditRow;
 
     QVariant buffer;                      //use with copy and paste functions
     QMenu* menu;
@@ -53,6 +55,7 @@ private:
     void deleteColumn(int);
     void addRow(int);
     void addColumn(int);
+    void deleteItem(int, int);
 public slots:
     void copySlot();
     void pasteSlot();
