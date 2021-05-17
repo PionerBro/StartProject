@@ -9,6 +9,9 @@ class CalcWidget : public QWidget
 public:
     explicit CalcWidget(QWidget *parent = nullptr);
 
+private slots:
+    void crDialog();
+    void crCalc();
 signals:
 
 };

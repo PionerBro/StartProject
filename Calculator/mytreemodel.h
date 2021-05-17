@@ -10,12 +10,7 @@ class MyTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    enum Table{
-        Materials,
-        Elements
-    };
-
-    MyTreeModel(const QList<QVariant> &data, int table = Materials, QObject* parent = 0);
+    MyTreeModel(const QList<QVariant> &data, const QString&, QObject* parent = 0);
     ~MyTreeModel();
 
     QVariant data(const QModelIndex& index, int role)const override;
@@ -33,8 +28,9 @@ private:
     void setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent);
 
     QList<QVariant> m_header;
-    MyTreeItem* rootItem;
-    MyTreeItem* root;
+    MyTreeItem*     rootItem;
+    MyTreeItem*     root;
+    QString         sqlTable;
 signals:
     void sendData(QList<QVariant>&);
 private slots:

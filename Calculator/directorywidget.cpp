@@ -3,6 +3,7 @@
 #include "mytreeitem.h"
 #include "diritem.h"
 #include "calcitem2delegate.h"
+#include "mydatabase.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -52,7 +53,7 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
            <<"Name"
            <<"Unit"
            <<"Price";
-    model = new MyTreeModel(header, MyTreeModel::Materials, this);
+    model = new MyTreeModel(header, TABLE_MATERIALS, this);
     view->setModel(model);
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
     viewSettings();

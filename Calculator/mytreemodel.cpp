@@ -6,7 +6,7 @@
 
 extern MyDataBase db;
 
-MyTreeModel::MyTreeModel(const QList<QVariant> &data, int table, QObject* parent):QAbstractItemModel(parent)
+MyTreeModel::MyTreeModel(const QList<QVariant> &data, const QString& table, QObject* parent):QAbstractItemModel(parent), sqlTable(table)
 {
     m_header = data;
     root = new MyTreeItem(m_header);
@@ -30,49 +30,9 @@ MyTreeModel::MyTreeModel(const QList<QVariant> &data, int table, QObject* parent
     }
     */
     //QList<QVariant> tmp;
-    QList<QList<QVariant>> list;
-    /*for(int i = 1; i < 10; ++i){
-        tmp<< i <<"item " + QString::number(i)<< 0 << 0;
-        list << tmp;
-        tmp.clear();
-    }
-    tmp<< 10 <<"item10" << 1 << 0;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 11 <<"item16" << 0 << 1;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 12 <<"item12" << 2 << 1;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 13 <<"item14" << 0 << 2;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 14 <<"item15" << 0 << 1;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 15 <<"item11" << 3 << 1;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 16 <<"item18" << 4 << 2;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 17 <<"item17" << 0 << 1;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 18 <<"item15" << 0 << 2;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 19 <<"item16" << 0 << 4;
-    list<<tmp;
-    tmp.clear();
-    tmp<< 20 <<"item13" << 0 << 4;
-    list<<tmp;
-    tmp.clear();*/
-    if(table == Materials)
-        db.selectMaterials(list);
-    else
-        db.selectElements(list);
+    QList<QList<QVariant>> list;     
+
+    db.select(sqlTable, list);
     setupModelData(list, root);
 }
 
@@ -143,19 +103,6 @@ int MyTreeModel::columnCount(const QModelIndex &parent)const{
 }
 //выгрузка элементов базы данных
 void MyTreeModel::setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent){
-    /*QList<QVariant> list;
-    list << "s"<<"11";
-    MyTreeItem* item = new MyTreeItem(list, parent);
-    rootItem->appendChild(item);
-    list.clear();
-    list<<"af";
-    item = new MyTreeItem(list, parent);
-    rootItem->appendChild(item);
-    list.clear();
-    list<<"as"<<"ss";
-    MyTreeItem* item2 = new MyTreeItem(list, item);
-    item->appendChild(item2);
-    */
 
     QList<MyTreeItem*> folders;
     folders<<parent;
@@ -203,9 +150,9 @@ MyTreeItem* MyTreeModel::currentRoot() const{
 
 bool MyTreeModel::createItem(MyTreeItem *itemP, QList<QVariant> &data){
     beginResetModel();
-    if(!db.insertIntoTable(data))
+    if(!db.insertIntoTable(sqlTable, data))
         return false;
-    qlonglong num = db.getLastNumNumber();
+    qlonglong num = db.getLastNumNumber(sqlTable);
     if(num==-1)
         return false;
     data[0] = num;
@@ -218,7 +165,7 @@ bool MyTreeModel::createItem(MyTreeItem *itemP, QList<QVariant> &data){
 
 bool MyTreeModel::updateItem(MyTreeItem* itemT, const QList<QVariant> &data){
     beginResetModel();
-    if(!db.updateTableItem(data))
+    if(!db.updateTableItem(sqlTable, data))
         return false;
     itemT->setRowData(data);
     itemT->parent()->sortItem();
@@ -228,13 +175,13 @@ bool MyTreeModel::updateItem(MyTreeItem* itemT, const QList<QVariant> &data){
 
 bool MyTreeModel::createFolder(MyTreeItem *itemP, QList<QVariant>& data){
     beginResetModel();
-    qlonglong folderNum = db.getLastFolderNumber() + 1;
+    qlonglong folderNum = db.getLastFolderNumber(sqlTable) + 1;
     if(!folderNum)
         return false;
     data[2] = folderNum;
-    if(!db.insertIntoTable(data))
+    if(!db.insertIntoTable(sqlTable, data))
         return false;
-    qlonglong num = db.getLastNumNumber();
+    qlonglong num = db.getLastNumNumber(sqlTable);
     if(num==-1)
         return false;
     data[0] = num;

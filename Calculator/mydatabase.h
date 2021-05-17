@@ -16,8 +16,10 @@
 #define MATERIALS_PRICE  "Price"
 
 #define TABLE_ELEMENTS   "TableElements"
-#define ELEMENTS_DATE    "Date"
 #define ELEMENTS_ID      "id"
+#define ELEMENTS_PARENT  "Parent"
+#define ELEMENTS_DIR     "Dir"
+#define ELEMENTS_DATE    "Date"
 #define ELEMENTS_NAME    "Name"
 #define ELEMENTS_PRICE   "Price"
 #define ELEMENTS_OUTPUT  "OutPut"
@@ -30,14 +32,11 @@ public:
     explicit MyDataBase(QObject *parent = nullptr);
 
     bool createConnection();
-    bool selectMaterials(QList<QList<QVariant>>& data);
-    bool selectElements(QList<QList<QVariant>>& data);
-    bool insertIntoTable(const QList<QVariant>& data);
-    bool insertIntoElements(const QList<QVariant>& data);
-    bool updateTableItem(const QList<QVariant>& data);
-    bool updateTableElements(const QList<QVariant>& data);
-    qlonglong getLastNumNumber() const;
-    qlonglong getLastFolderNumber() const;
+    bool select(const QString&, QList<QList<QVariant>>& data);
+    bool insertIntoTable(const QString&, const QList<QVariant>& data);
+    bool updateTableItem(const QString&, const QList<QVariant>& data);
+    qlonglong getLastNumNumber(const QString&) const;
+    qlonglong getLastFolderNumber(const QString&) const;
 private:
     QSqlDatabase m_db;
 private:

@@ -1,10 +1,15 @@
 #include "calcwidget.h"
 #include "mytreemodel.h"
+#include "mydatabase.h"
+#include "calcitem.h"
+#include "directorywidget.h"
 
 #include <QToolBar>
 #include <QAction>
 #include <QTableView>
 #include <QVBoxLayout>
+
+#include <QDebug>
 
 CalcWidget::CalcWidget(QWidget *parent) : QWidget(parent)
 {
@@ -22,12 +27,30 @@ CalcWidget::CalcWidget(QWidget *parent) : QWidget(parent)
     vbx->addWidget(tool);
     vbx->addWidget(view);
     QList<QVariant> list;
-    list <<"Date"
-         <<"Num"
+    list <<"Num"
+         <<"Parent"
+         <<"Dir"
+         <<"Date"
          <<"Name"
-         <<"Price";
+         <<"Price"
+         <<"OutPut"
+         <<"Portion";
 
-    MyTreeModel* model = new MyTreeModel(list, MyTreeModel::Materials, this);
+    MyTreeModel* model = new MyTreeModel(list, TABLE_ELEMENTS, this);
     view->setModel(model);
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
+}
+
+void CalcWidget::crDialog(){
+    DirectoryWidget* tDialog = new DirectoryWidget(this);
+    tDialog->exec();
+}
+
+void CalcWidget::crCalc(){
+    CalcItem* item = new CalcItem(this);
+    if(item->exec()){
+        qDebug()<<"Calc created";
+    }else
+        qDebug()<<"Calc not created";
+
 }
