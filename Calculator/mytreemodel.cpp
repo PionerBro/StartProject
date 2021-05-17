@@ -6,7 +6,7 @@
 
 extern MyDataBase db;
 
-MyTreeModel::MyTreeModel(const QList<QVariant> &data, QObject* parent):QAbstractItemModel(parent)
+MyTreeModel::MyTreeModel(const QList<QVariant> &data, int table, QObject* parent):QAbstractItemModel(parent)
 {
     m_header = data;
     root = new MyTreeItem(m_header);
@@ -69,8 +69,10 @@ MyTreeModel::MyTreeModel(const QList<QVariant> &data, QObject* parent):QAbstract
     tmp<< 20 <<"item13" << 0 << 4;
     list<<tmp;
     tmp.clear();*/
-
-    db.select(list);
+    if(table == Materials)
+        db.selectMaterials(list);
+    else
+        db.selectElements(list);
     setupModelData(list, root);
 }
 
@@ -171,7 +173,7 @@ void MyTreeModel::setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem
             pItem->folder = true;
         }
     }
-    for(int i = 1; i<folders.count();++i){
+    for(int i = 0; i<folders.count();++i){
         folders[i]->sortItem();
     }
     rootItem = parent;
@@ -208,6 +210,40 @@ bool MyTreeModel::createItem(MyTreeItem *itemP, QList<QVariant> &data){
         return false;
     data[0] = num;
     MyTreeItem* newItem = new MyTreeItem(data, itemP);
+    itemP->appendChild(newItem);
+    itemP->sortItem();
+    endResetModel();
+    return true;
+}
+
+bool MyTreeModel::updateItem(MyTreeItem* itemT, const QList<QVariant> &data){
+    beginResetModel();
+    if(!db.updateTableItem(data))
+        return false;
+    itemT->setRowData(data);
+    itemT->parent()->sortItem();
+    endResetModel();
+    return true;
+}
+
+bool MyTreeModel::createFolder(MyTreeItem *itemP, QList<QVariant>& data){
+    beginResetModel();
+    qlonglong folderNum = db.getLastFolderNumber() + 1;
+    if(!folderNum)
+        return false;
+    data[2] = folderNum;
+    if(!db.insertIntoTable(data))
+        return false;
+    qlonglong num = db.getLastNumNumber();
+    if(num==-1)
+        return false;
+    data[0] = num;
+    MyTreeItem* newItem = new MyTreeItem(data, itemP);
+    newItem->folder = true;
+    MyTreeItem* pItem = new MyTreeItem(data, itemP);
+    newItem->appendChild(pItem);
+    pItem->isOpen = true;
+    pItem->folder = true;
     itemP->appendChild(newItem);
     itemP->sortItem();
     endResetModel();

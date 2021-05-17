@@ -10,7 +10,12 @@ class MyTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    MyTreeModel(const QList<QVariant> &data, QObject* parent = 0);
+    enum Table{
+        Materials,
+        Elements
+    };
+
+    MyTreeModel(const QList<QVariant> &data, int table = Materials, QObject* parent = 0);
     ~MyTreeModel();
 
     QVariant data(const QModelIndex& index, int role)const override;
@@ -22,6 +27,8 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex())const override;
     MyTreeItem* currentRoot()const ;
     bool createItem(MyTreeItem* , QList<QVariant>&);
+    bool updateItem(MyTreeItem* , const QList<QVariant>&);
+    bool createFolder(MyTreeItem* , QList<QVariant>&);
 private:
     void setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent);
 

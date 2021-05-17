@@ -12,6 +12,7 @@ SOURCES += \
     calcitem.cpp \
     calcitem2delegate.cpp \
     calctablewidget.cpp \
+    calcwidget.cpp \
     cellwidget.cpp \
     directorywidget.cpp \
     diritem.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
     calcitem.h \
     calcitem2delegate.h \
     calctablewidget.h \
+    calcwidget.h \
     cellwidget.h \
     directorywidget.h \
     diritem.h \

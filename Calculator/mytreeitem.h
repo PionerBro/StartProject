@@ -18,6 +18,7 @@ public:
     int columnCount()const;
     int childCount()const;
     void sortItem();
+    void setRowData(const QList<QVariant>& data);
 
     void appendChild(MyTreeItem* child);
     bool folder;

@@ -15,6 +15,13 @@
 #define MATERIALS_UNIT   "Unit"
 #define MATERIALS_PRICE  "Price"
 
+#define TABLE_ELEMENTS   "TableElements"
+#define ELEMENTS_DATE    "Date"
+#define ELEMENTS_ID      "id"
+#define ELEMENTS_NAME    "Name"
+#define ELEMENTS_PRICE   "Price"
+#define ELEMENTS_OUTPUT  "OutPut"
+#define ELEMENTS_PORTION "Portion"
 
 class MyDataBase : public QObject
 {
@@ -23,9 +30,14 @@ public:
     explicit MyDataBase(QObject *parent = nullptr);
 
     bool createConnection();
-    bool select(QList<QList<QVariant>>& data);
+    bool selectMaterials(QList<QList<QVariant>>& data);
+    bool selectElements(QList<QList<QVariant>>& data);
     bool insertIntoTable(const QList<QVariant>& data);
-    qlonglong getLastNumNumber();
+    bool insertIntoElements(const QList<QVariant>& data);
+    bool updateTableItem(const QList<QVariant>& data);
+    bool updateTableElements(const QList<QVariant>& data);
+    qlonglong getLastNumNumber() const;
+    qlonglong getLastFolderNumber() const;
 private:
     QSqlDatabase m_db;
 private:
@@ -33,6 +45,7 @@ private:
     void closeDatabase();
     bool createDatabase();
     bool createTable();
+    bool createTableElements();
 signals:
 
 };

@@ -10,11 +10,18 @@ class DirItem : public QDialog
 {
     Q_OBJECT
 public:
-    DirItem(qlonglong rootItemNum, QList<QVariant> &data, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    enum DirType{
+        Element,
+        Folder
+    };
+    Q_ENUM(DirType)
+
+    DirItem(qlonglong rootItemNum, QList<QVariant> &data, int type,  QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     DirItem(QList<QVariant> &data, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~DirItem();
 private:
     void setupDirItem(const QList<QVariant>& data);
+    void setupDirFolder(const QList<QVariant>& data);
 private slots:
     void slotOkClicked();
 private:

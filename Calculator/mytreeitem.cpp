@@ -19,16 +19,21 @@ MyTreeItem::MyTreeItem(const QList<QVariant> &data, MyTreeItem* parent)
 }
 
 MyTreeItem::~MyTreeItem(){
-    qDebug()<<itemData.value(0);
     qDeleteAll(childItems);
 }
 
 void MyTreeItem::sortItem(){
-    if(!childItems.isEmpty()){
-        MyTreeItem* tmp = childItems.value(0);
-        childItems.removeFirst();
-        std::sort(childItems.begin(), childItems.end(), compare);
-        childItems.push_front(tmp);
+    if(parentItem){
+        if((childItems.count() > 1)){
+            MyTreeItem* tmp = childItems.value(0);
+            childItems.removeFirst();
+            std::sort(childItems.begin(), childItems.end(), compare);
+            childItems.push_front(tmp);
+        }
+    }else{
+        if(!childItems.isEmpty()){
+            std::sort(childItems.begin(), childItems.end(), compare);
+        }
     }
 }
 QList<QVariant> MyTreeItem::rowData() const{
@@ -57,4 +62,9 @@ int MyTreeItem::childCount()const{
 
 void MyTreeItem::appendChild(MyTreeItem* child){
     childItems.append(child);
+}
+
+void MyTreeItem::setRowData(const QList<QVariant> &data){
+    itemData.clear();
+    itemData<<data;
 }

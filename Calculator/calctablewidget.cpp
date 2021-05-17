@@ -61,7 +61,6 @@ void CalcTableWidget::cellWidgetButtonClicked(){
         qDebug()<<"good";
     }else{
         qDebug()<<"bad";
-
     }
 }
 
@@ -75,16 +74,16 @@ void CalcTableWidget::setRowData(QList<QVariant>& data){
     cellWidget->setRow(rowNum);
     cellWidget->setColumn(0);
     setCellWidget(rowNum, 0, cellWidget);         //set cell widget in current position
-    cellWidget->setText(data.value(1).toString());
+    cellWidget->setText(data.value(3).toString());
 
     QTableWidgetItem* item = new QTableWidgetItem();
     item->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
-    item->setData(Qt::DisplayRole, data.value(2));
+    item->setData(Qt::DisplayRole, data.value(4));
     setItem(rowNum,1,item);
 
     item = new QTableWidgetItem();
     item->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
-    item->setData(Qt::DisplayRole, QString::number(data.value(0).toDouble(),'f',2));
+    item->setData(Qt::DisplayRole, QString::number(data.value(5).toDouble(),'f',2));
     setItem(rowNum,3,item);
 }
 
@@ -104,7 +103,6 @@ bool CalcTableWidget::event(QEvent* e){
                 emit cellChanged(-1,-1);
             }
         }
-
     }
     return QTableWidget::event(e);
 }

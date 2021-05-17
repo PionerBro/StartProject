@@ -2,6 +2,7 @@
 #include "mytreemodel.h"
 #include "mytreeitem.h"
 #include "diritem.h"
+#include "calcitem2delegate.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -51,7 +52,7 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
            <<"Name"
            <<"Unit"
            <<"Price";
-    model = new MyTreeModel(header, this);
+    model = new MyTreeModel(header, MyTreeModel::Materials, this);
     view->setModel(model);
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
     viewSettings();
@@ -66,43 +67,59 @@ void DirectoryWidget::viewSettings(){
     //view->setColumnHidden(0,true);
     //view->setColumnHidden(2,true);
     //view->setColumnHidden(3,true);
+
     view->resizeColumnsToContents();
     view->horizontalHeader()->setStretchLastSection(true);
     view->setCurrentIndex(model->index(0,1,QModelIndex()));
 }
 
 void DirectoryWidget::createItem(){
-    QList<QVariant> data;
     MyTreeItem* itemP = model->currentRoot();
-    DirItem* item = new DirItem(itemP->data(2).toLongLong(), data, this);
+    QList<QVariant> data;
+    DirItem* item = new DirItem(itemP->data(2).toLongLong(), data, DirItem::Element ,this);
     if(item->exec()){
-        qDebug()<<"Item created";
+        qDebug()<<"DirItem created";
         model->createItem(itemP, data);
-        qDebug()<<data;
     }else
-        qDebug()<<"Item not created";
+        qDebug()<<"DirItem not created";
 }
 
 void DirectoryWidget::editItem(){
     QModelIndex index = view->currentIndex();
     if(index.isValid()){
         MyTreeItem* tItem = static_cast<MyTreeItem*>(index.internalPointer());
+        if(tItem->isOpen)
+            return;
         QList<QVariant> data = tItem->rowData();
         DirItem* item = new DirItem(data, this);
-        if(item->exec())
-            qDebug()<<"Item changed";
+        if(item->exec()){
+            model->updateItem(tItem, data);
+            qDebug()<<"DirItem changed";
+        }
         else
-            qDebug()<<"Item not changed";
+            qDebug()<<"DirItem not changed";
     }
 }
 
 void DirectoryWidget::createFolder(){
-    QModelIndex index= view->currentIndex();
-    qDebug()<<"createFolder"<<index.row()<<index.column();
+    MyTreeItem* itemP = model->currentRoot();
+    QList<QVariant> data;
+    DirItem* item = new DirItem(itemP->data(2).toLongLong(), data, DirItem::Folder, this);
+    if(item->exec()){
+        model->createFolder(itemP, data);
+        qDebug()<<"DirFolder created";
+    }
+    else
+        qDebug()<<"DirFolder not created";
 }
 
 void DirectoryWidget::deleteItem(){
     QModelIndex index= view->currentIndex();
+    if(index.isValid()){
+        MyTreeItem* tItem = static_cast<MyTreeItem*>(index.internalPointer());
+        if(tItem->isOpen)
+            return;
+    }
     qDebug()<<"deleteItem"<<index.row()<<index.column();
 }
 

@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
          <<"Folder"
          <<"Parent";
 
-    MyTreeModel* model = new MyTreeModel(list,widget);
+    MyTreeModel* model = new MyTreeModel(list, MyTreeModel::Materials, widget);
     view->setModel(model);
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
 }

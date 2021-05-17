@@ -12,19 +12,29 @@
 #include <QDebug>
 
 
-DirItem::DirItem(qlonglong rootItemNum, QList<QVariant> &data, QWidget* parent, Qt::WindowFlags f):QDialog(parent, f), m_data(data)
+DirItem::DirItem(qlonglong rootItemNum, QList<QVariant> &data, int type, QWidget* parent, Qt::WindowFlags f):QDialog(parent, f), m_data(data)
 {
     num = 0;
     parentNum = rootItemNum;
     dirNum = 0;
-    setupDirItem({});
+    if(type == Element){
+        dirNum = 0;
+        setupDirItem({});
+    }else{
+        dirNum = -1;
+        setupDirFolder({});
+    }
 }
 
 DirItem::DirItem(QList<QVariant>& data, QWidget* parent, Qt::WindowFlags f):QDialog(parent,f), m_data(data){
     num = data.value(0).toLongLong();
     parentNum = data.value(1).toLongLong();
-    dirNum = 0;
-    setupDirItem(data);
+    dirNum = data.value(2).toLongLong();
+    if(!dirNum){
+        setupDirItem(data);
+    }else{
+        setupDirFolder(data);
+    }
 }
 
 DirItem::~DirItem(){
@@ -73,15 +83,48 @@ void DirItem::setupDirItem(const QList<QVariant>& data){
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
+void DirItem::setupDirFolder(const QList<QVariant>& data){
+    setAttribute(Qt::WA_DeleteOnClose);
+    QVBoxLayout* vbx = new QVBoxLayout(this);
+    QHBoxLayout* hbx1 = new QHBoxLayout;
+    QLabel* nameLabel = new QLabel(tr("Наименование"), this);
+    nameEdit = new QLineEdit(this);
+    nameEdit->setText(data.value(3).toString());
+    hbx1->addWidget(nameLabel);
+    hbx1->addWidget(nameEdit);
+    vbx->addLayout(hbx1);
+
+
+    QHBoxLayout* hbx4 = new QHBoxLayout;
+    btnOk = new QPushButton(tr("Ок"), this);
+    QPushButton* btnCancel = new QPushButton(tr("Отмена"), this);
+    hbx4->addWidget(btnOk);
+    hbx4->addWidget(btnCancel);
+    vbx->addLayout(hbx4);
+
+    connect(btnOk, SIGNAL(clicked()), this, SLOT(slotOkClicked()));
+    connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
+}
+
 void DirItem::slotOkClicked(){
     QString name = nameEdit->text();
-    QString unit = unitBox->currentData(Qt::DisplayRole).toString();
-    QString price = priceEdit->text();
-    if(name.isEmpty() || unit.isEmpty() || price == "0.00"){
-        QMessageBox::information(0, "Error", tr("Заполните все позиции"));
-        return;
-    }
     m_data.clear();
-    m_data<<num<<parentNum<<dirNum<<name<<unit<<price;
+    m_data<<num<<parentNum<<dirNum;
+    if(!dirNum){
+        QString unit = unitBox->currentData(Qt::DisplayRole).toString();
+        QString price = priceEdit->text();
+        if(name.isEmpty() || unit.isEmpty() || price == "0.00"){
+            QMessageBox::information(0, "Error", tr("Заполните все позиции"));
+            return;
+        }
+        m_data<<name<<unit<<price;
+    }else{
+        if(name.isEmpty()){
+            QMessageBox::information(0, "Error", tr("Заполните все позиции"));
+            return;
+        }
+        m_data<<name<<QVariant()<<QVariant();
+    }
+
     accept();
 }
