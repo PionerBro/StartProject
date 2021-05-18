@@ -48,7 +48,8 @@ void CalcTableWidget::addNewRow(){
     wItem = new QTableWidgetItem();
     setItem(rowNum,4,wItem);
 
-    emit cellWidget->buttonWidget()->clicked();
+    setCurrentCell(rowNum, 2);
+    //emit cellWidget->buttonWidget()->clicked();
 }
 
 void CalcTableWidget::cellWidgetButtonClicked(){
@@ -113,3 +114,9 @@ bool CalcTableWidget::event(QEvent* e){
     return QTableWidget::event(e);
 }
 
+void CalcTableWidget::setDataAtIndex(int row, int col, const QVariant &data){
+    QTableWidgetItem* item = new QTableWidgetItem();
+    item->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
+    item->setData(Qt::DisplayRole, data);
+    setItem(row,col,item);
+}

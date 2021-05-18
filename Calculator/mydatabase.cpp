@@ -247,3 +247,28 @@ bool MyDataBase::updateTableItem(const QString& table, const QList<QVariant> &da
         return false;
 }
 
+bool MyDataBase::selectAtNum(qlonglong num, const QString &table, QList<QList<QVariant>> &data){
+    QSqlQuery query(m_db);
+    int eCount;
+    if(table == TABLE_MATERIALS)
+        eCount = 6;
+    else if(table == TABLE_ELEMENTS)
+        eCount = 8;
+    else if(table == TABLE_ITEMS)
+        eCount = 3;
+    else
+        return false;
+    if(query.exec("SELECT* FROM " + table + " WHERE id = " + QString::number(num))){
+        while(query.next()){
+            QList<QVariant> vect;
+            for(int i = 0; i<eCount;++i){
+                vect<<query.value(i);
+            }
+            data<<vect;
+        }
+        return true;
+    }else{
+        return false;
+    }
+
+}

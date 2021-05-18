@@ -42,6 +42,8 @@ private:
     QLineEdit* portionEdit;
     QLabel* sumLabel;
 
+private slots:
+    void btnAddRowClicked();
 public slots:
     void dataChanged(int,int);
     void printSlot();

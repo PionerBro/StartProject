@@ -41,6 +41,7 @@ public:
     bool select(const QString&, QList<QList<QVariant>>& data);
     bool insertIntoTable(const QString&, const QList<QVariant>& data);
     bool updateTableItem(const QString&, const QList<QVariant>& data);
+    bool selectAtNum(qlonglong num, const QString&, QList<QList<QVariant>>& data);
     qlonglong getLastNumNumber(const QString&) const;
     qlonglong getLastFolderNumber(const QString&) const;
 private:

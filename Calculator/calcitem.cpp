@@ -8,6 +8,8 @@
 #include "mydoublevalidator.h"
 #include "myprintwidget.h"
 #include "mytreeitem.h"
+#include "mydatabase.h"
+#include <cellwidget.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -21,6 +23,8 @@
 #include <QAction>
 
 #include <QDebug>
+
+extern MyDataBase db;
 
 CalcItem::CalcItem(MyTreeItem* itemP, int type, QWidget* parent, Qt::WindowFlags f):QDialog(parent,f), parentItem(itemP)
 {
@@ -43,8 +47,13 @@ CalcItem::CalcItem(MyTreeItem* itemP, int type, QWidget* parent, Qt::WindowFlags
             dateEdit->setDate(parentItem->data(3).toDate());
             outputEdit->setText(parentItem->data(6).toString());
             portionEdit->setText(parentItem->data(7).toString());
-            for(int i = 8; i<parentItem->rowData().count(); i+=2){
-                qDebug()<<parentItem->data(i)<<parentItem->data(i+1);
+            for(int i = 8, j = 0; i<parentItem->rowData().count(); i+=2, ++j){
+                QList<QList<QVariant>> list;
+                db.selectAtNum(parentItem->data(i).toLongLong(), TABLE_MATERIALS, list);
+                QList<QVariant> listData = list.value(0);
+                table->addNewRow();
+                table->setRowData(listData);
+                table->setDataAtIndex(j, 2, parentItem->data(i+1));
             }
         }
     }
@@ -127,7 +136,7 @@ void CalcItem::setupCalcItem(){
     table->setItemDelegateForColumn(3, delegate);
     table->setItemDelegateForColumn(4, delegate);
     table->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::DoubleClicked);
-    connect(btnAddRow, SIGNAL(clicked()), table, SLOT(addNewRow()));
+    connect(btnAddRow, SIGNAL(clicked()), table, SLOT(btnAddRowClicked()));
     connect(table, SIGNAL(cellChanged(int,int)), this, SLOT(dataChanged(int,int)));
     vbx->addWidget(table);
     QHBoxLayout* hbxSize = new QHBoxLayout;
@@ -320,4 +329,9 @@ void CalcItem::slotOkClicked(){
     }
     emit sendData(data, parentItem);
     accept();
+}
+
+void CalcItem::btnAddRowClicked(){
+    table->addNewRow();
+    emit static_cast<CellWidget*>(table->cellWidget(table->rowCount()-1, 0))->buttonWidget()->clicked();
 }
