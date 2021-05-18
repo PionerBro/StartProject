@@ -69,6 +69,7 @@ void CalcTableWidget::setRowData(QList<QVariant>& data){
     int rowNum = currentRow();
 
     qDebug()<<data<<" "<<rowNum;
+    itemNums.push_back(data.value(0).toLongLong());
     CellWidget* cellWidget = new CellWidget(this);
     connect(cellWidget->buttonWidget(), SIGNAL(clicked()), this, SLOT(cellWidgetButtonClicked()));
     cellWidget->setRow(rowNum);
@@ -87,6 +88,10 @@ void CalcTableWidget::setRowData(QList<QVariant>& data){
     setItem(rowNum,3,item);
 }
 
+qlonglong CalcTableWidget::getItemNum(int pos)const{
+    return itemNums.value(pos);
+}
+
 bool CalcTableWidget::event(QEvent* e){
     if(e->type() == QEvent::KeyPress){
         int eKey = static_cast<QKeyEvent*>(e)->key();
@@ -100,6 +105,7 @@ bool CalcTableWidget::event(QEvent* e){
             int row = currentIndex().row();
             if(row > -1){
                 removeRow(row);
+                itemNums.pop_back();
                 emit cellChanged(-1,-1);
             }
         }

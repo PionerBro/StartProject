@@ -16,7 +16,6 @@ DirItem::DirItem(qlonglong rootItemNum, QList<QVariant> &data, int type, QWidget
 {
     num = 0;
     parentNum = rootItemNum;
-    dirNum = 0;
     if(type == Element){
         dirNum = 0;
         setupDirItem({});

@@ -3,15 +3,30 @@
 
 #include <QWidget>
 
+class QTableView;
+class MyTreeModel;
+class MyTreeItem;
+
 class CalcWidget : public QWidget
 {
     Q_OBJECT
 public:
     explicit CalcWidget(QWidget *parent = nullptr);
 
+private:
+    void viewSettings();
+private:
+    QTableView* view;
+    MyTreeModel* model;
 private slots:
-    void crDialog();
-    void crCalc();
+    void createItem();
+    void createFolder();
+    void editItem();
+    void deleteItem();
+    void selectItem();
+    void addNewElement(QList<QVariant>&,MyTreeItem*);
+    void editElement(QList<QVariant>&,MyTreeItem*);
+    void addNewFolder(QList<QVariant>&,MyTreeItem*);
 signals:
 
 };

@@ -9,10 +9,11 @@ class CalcTableWidget : public QTableWidget
 public:
     CalcTableWidget(QWidget* parent = nullptr);
     CalcTableWidget(int rows, int columns, QWidget* parent = nullptr);
-
+    qlonglong getItemNum(int pos)const;
 protected:
     virtual bool event(QEvent* e) override;
-
+private:
+    QVector<qlonglong> itemNums;
 public slots:
     void addNewRow();
     void cellWidgetButtonClicked();

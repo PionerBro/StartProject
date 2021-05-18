@@ -10,26 +10,45 @@ class CalcTableWidget;
 class QLineEdit;
 class QDateEdit;
 
+class MyTreeItem;
+
 class CalcItem : public QDialog
 {
     Q_OBJECT
 public:
-    CalcItem(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    enum CalcType{
+        Element,
+        Folder
+    };
+    Q_ENUM(CalcType)
+
+
+    CalcItem(MyTreeItem* itemP, int type, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~CalcItem();
 
 private:
+    void setupCalcItem();
+    void setupCalcFolder();
+private:
     CalcTableWidget* table;
-    QLabel* sumLabel;
-    QLabel* priceLabel;
-    QLineEdit* nameEdit;
-    QLineEdit* portionEdit;
-    QLineEdit* sizeEdit;
+    MyTreeItem* parentItem;
+    qlonglong num;
+    qlonglong parentNum;
+    qlonglong dirNum;
     QDateEdit* dateEdit;
+    QLineEdit* nameEdit;
+    QLabel* priceLabel;
+    QLineEdit* outputEdit;
+    QLineEdit* portionEdit;
+    QLabel* sumLabel;
 
 public slots:
     void dataChanged(int,int);
     void printSlot();
     void priceSlot();
+    void slotOkClicked();
+signals:
+    void sendData(QList<QVariant>&, MyTreeItem*);
 };
 
 #endif // CALCITEM_H

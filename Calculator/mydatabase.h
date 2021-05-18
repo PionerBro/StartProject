@@ -25,6 +25,12 @@
 #define ELEMENTS_OUTPUT  "OutPut"
 #define ELEMENTS_PORTION "Portion"
 
+#define TABLE_ITEMS      "TableItems"
+#define ITEMS_DOC        "Document"
+#define ITEMS_NUM        "id"
+#define ITEMS_COUNT      "Count"
+
+
 class MyDataBase : public QObject
 {
     Q_OBJECT
@@ -45,6 +51,7 @@ private:
     bool createDatabase();
     bool createTable();
     bool createTableElements();
+    bool createTableItems();
 signals:
 
 };

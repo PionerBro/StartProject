@@ -7,7 +7,7 @@
 #include "printwidget.h"
 #include "mydoublevalidator.h"
 #include "myprintwidget.h"
-
+#include "mytreeitem.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -22,11 +22,44 @@
 
 #include <QDebug>
 
-CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
+CalcItem::CalcItem(MyTreeItem* itemP, int type, QWidget* parent, Qt::WindowFlags f):QDialog(parent,f), parentItem(itemP)
 {
+    if(type == Element){
+        dirNum = 0;
+        setupCalcItem();
+    }else{
+        dirNum = -1;
+        setupCalcFolder();
+    }
+    if(!itemP->data(0).toLongLong() || itemP->data(2).toLongLong()){
+        num = 0;
+        parentNum = parentItem->data(2).toLongLong();
+    }else{
+        num = parentItem->data(0).toULongLong();
+        parentNum = parentItem->data(1).toLongLong();
+        dirNum = parentItem->data(2).toLongLong();
+        nameEdit->setText(parentItem->data(4).toString());
+        if(type == Element){
+            dateEdit->setDate(parentItem->data(3).toDate());
+            outputEdit->setText(parentItem->data(6).toString());
+            portionEdit->setText(parentItem->data(7).toString());
+            for(int i = 8; i<parentItem->rowData().count(); i+=2){
+                qDebug()<<parentItem->data(i)<<parentItem->data(i+1);
+            }
+        }
+    }
+}
+
+CalcItem::~CalcItem(){
+    qDebug()<<"CalcItem destroyed";
+}
+
+void CalcItem::setupCalcItem(){
     setWindowFlag(Qt::WindowMaximizeButtonHint,true);
+    setWindowFlag(Qt::WindowMinimizeButtonHint,true);
     resize(800,400);
     setAttribute(Qt::WA_DeleteOnClose);
+    setModal(false);
     QVBoxLayout* vbx = new QVBoxLayout(this);
     QHBoxLayout* hbx1 = new QHBoxLayout;
     vbx->addLayout(hbx1);
@@ -43,15 +76,15 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     hbx2->addLayout(hbx21);
     hbx2->setAlignment(hbx21, Qt::AlignLeft);
     QLabel* portionsLabel = new QLabel(tr("Выход, кг.: "), this);
-    portionEdit = new QLineEdit(this);
-    portionEdit->setText("");
-    portionEdit->setMaximumSize(60, 25);
-    MyDoubleValidator* validator = new MyDoubleValidator(0,10000,3,portionEdit,MyDoubleValidator::DigitalPoint::Dot);
-    portionEdit->setValidator(validator);   
+    outputEdit = new QLineEdit(this);
+    outputEdit->setText("");
+    outputEdit->setMaximumSize(60, 25);
+    MyDoubleValidator* validator = new MyDoubleValidator(0,10000,3,outputEdit,MyDoubleValidator::DigitalPoint::Dot);
+    outputEdit->setValidator(validator);
     hbx21->addWidget(portionsLabel,0,Qt::AlignLeft);
-    hbx21->addWidget(portionEdit,0,Qt::AlignLeft);
+    hbx21->addWidget(outputEdit,0,Qt::AlignLeft);
     hbx21->addSpacing(100);
-    connect(portionEdit, SIGNAL(textChanged(QString)), this, SLOT(priceSlot()));
+    connect(outputEdit, SIGNAL(textChanged(QString)), this, SLOT(priceSlot()));
 
     QHBoxLayout* hbx22 = new QHBoxLayout;
     hbx2->addLayout(hbx22);
@@ -101,14 +134,14 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     vbx->addLayout(hbxSize);
     vbx->setAlignment(hbxSize, Qt::AlignRight);
     QLabel* sizeLabel = new QLabel(tr("Порция, г.: "),this);
-    sizeEdit = new QLineEdit("",this);
-    sizeEdit->setMaximumSize(100, 25);
+    portionEdit = new QLineEdit("",this);
+    portionEdit->setMaximumSize(100, 25);
     //MyDoubleValidator* sizeEditValidator = new MyDoubleValidator(0,10000,3,sizeEdit);
-    sizeEdit->setValidator(validator);
+    portionEdit->setValidator(validator);
     hbxSize->addWidget(sizeLabel, Qt::AlignRight);
     hbxSize->setAlignment(sizeLabel, Qt::AlignRight);
-    hbxSize->addWidget(sizeEdit, Qt::AlignRight);
-    connect(sizeEdit, SIGNAL(textChanged(QString)), this, SLOT(priceSlot()));
+    hbxSize->addWidget(portionEdit, Qt::AlignRight);
+    connect(portionEdit, SIGNAL(textChanged(QString)), this, SLOT(priceSlot()));
     QLabel* textPriceLabel = new QLabel(tr("Цена: "),this);
     priceLabel = new QLabel("0.00", this);
     priceLabel->setMinimumSize(60,20);
@@ -129,7 +162,7 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     hbxBtn->setAlignment(hbxBtn3, Qt::AlignRight);
     QPushButton* btnOk = new QPushButton(tr("Ок"),this);
     btnOk->setMaximumSize(100,30);
-    connect(btnOk, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(btnOk, SIGNAL(clicked()), this, SLOT(slotOkClicked()));
     hbxBtn2->addWidget(btnOk);
     QPushButton* btnCancel = new QPushButton(tr("Отмена"), this);
     btnCancel->setMaximumSize(100,30);
@@ -143,11 +176,43 @@ CalcItem::CalcItem(QWidget* parent, Qt::WindowFlags f):QDialog(parent,f)
     hbxBtn3->addWidget(btnPrint, 0, Qt::AlignRight);
     btnPrint->setFocusPolicy(Qt::NoFocus);
     connect(btnPrint, SIGNAL(clicked()), this, SLOT(printSlot()));
-
 }
 
-CalcItem::~CalcItem(){
-    qDebug()<<"CalcItem destroyed";
+void CalcItem::setupCalcFolder(){
+    setWindowFlag(Qt::WindowMaximizeButtonHint,true);
+    resize(800,400);
+    setAttribute(Qt::WA_DeleteOnClose);
+    setModal(false);
+    QVBoxLayout* vbx = new QVBoxLayout(this);
+    QHBoxLayout* hbx1 = new QHBoxLayout;
+    vbx->addLayout(hbx1);
+    QLabel* nameLabel = new QLabel(tr("Наименование: "), this);
+    nameEdit = new QLineEdit(this);
+    nameEdit->setText("");
+    hbx1->addWidget(nameLabel);
+    hbx1->addWidget(nameEdit);
+
+    QHBoxLayout* hbxBtn = new QHBoxLayout;
+    vbx->addLayout(hbxBtn);
+    vbx->setAlignment(hbxBtn, Qt::AlignHCenter);
+    QHBoxLayout* hbxBtn1 = new QHBoxLayout;
+    QHBoxLayout* hbxBtn2 = new QHBoxLayout;
+    QHBoxLayout* hbxBtn3 = new QHBoxLayout;
+    hbxBtn->addLayout(hbxBtn1);
+    hbxBtn->addLayout(hbxBtn2);
+    hbxBtn->addLayout(hbxBtn3);
+    hbxBtn->setAlignment(hbxBtn2, Qt::AlignHCenter);
+    hbxBtn->setAlignment(hbxBtn3, Qt::AlignRight);
+    QPushButton* btnOk = new QPushButton(tr("Ок"),this);
+    btnOk->setMaximumSize(100,30);
+    connect(btnOk, SIGNAL(clicked()), this, SLOT(slotOkClicked()));
+    hbxBtn2->addWidget(btnOk);
+    QPushButton* btnCancel = new QPushButton(tr("Отмена"), this);
+    btnCancel->setMaximumSize(100,30);
+    connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
+    hbxBtn2->addWidget(btnCancel);
+    btnOk->setFocusPolicy(Qt::NoFocus);
+    btnCancel->setFocusPolicy(Qt::NoFocus);
 }
 
 void CalcItem::dataChanged(int row, int column){
@@ -166,7 +231,7 @@ void CalcItem::dataChanged(int row, int column){
         }
 
         sumLabel->setText(QString::number(sum, 'f', 2));
-        emit portionEdit->textChanged("");
+        emit outputEdit->textChanged("");
     }
     if(row == -1){
         double sum = 0;
@@ -177,15 +242,15 @@ void CalcItem::dataChanged(int row, int column){
         }
 
         sumLabel->setText(QString::number(sum, 'f', 2));
-        emit portionEdit->textChanged("");
+        emit outputEdit->textChanged("");
     }
 }
 
 void CalcItem::priceSlot(){
     bool ok;
-    double portion = portionEdit->text().toDouble(&ok);
+    double portion = outputEdit->text().toDouble(&ok);
     if(ok && portion){
-        priceLabel->setText(QString::number(sumLabel->text().toDouble()*sizeEdit->text().toDouble()/portion/1000, 'f',2));
+        priceLabel->setText(QString::number(sumLabel->text().toDouble()*portionEdit->text().toDouble()/portion/1000, 'f',2));
     }else{
         priceLabel->setText("0.00");
     }
@@ -220,7 +285,7 @@ void CalcItem::printSlot(){
     */
     QList<QStringList> data;
     QStringList list;
-    list<<nameEdit->text()<<portionEdit->text()<<dateEdit->date().toString("dd.MM.yyyy")<<sumLabel->text()<<sizeEdit->text()<<priceLabel->text();
+    list<<nameEdit->text()<<outputEdit->text()<<dateEdit->date().toString("dd.MM.yyyy")<<sumLabel->text()<<portionEdit->text()<<priceLabel->text();
     data<<list;
     for(int i = 0; i<table->rowCount(); ++i){
         QStringList row;
@@ -235,4 +300,24 @@ void CalcItem::printSlot(){
     //print->exec();
     MyPrintWidget* print = new MyPrintWidget(data);
     print->show();
+}
+
+void CalcItem::slotOkClicked(){
+    QList<QVariant> data;
+    QString name = nameEdit->text();
+    data<<num<<parentNum<<dirNum;
+    if(!dirNum){
+        QString date = dateEdit->text();
+        QString price = priceLabel->text();
+        QString output = outputEdit->text();
+        QString portion = portionEdit->text();
+        data<<date<<name<<price<<output<<portion;
+        for(int i = 0; i<table->rowCount(); ++i){
+            data<<table->getItemNum(i)<<table->item(i, 2)->data(Qt::DisplayRole).toDouble();
+        }
+    }else{
+        data<<QVariant()<<name<<QVariant()<<QVariant()<<QVariant();
+    }
+    emit sendData(data, parentItem);
+    accept();
 }

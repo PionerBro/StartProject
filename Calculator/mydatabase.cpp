@@ -70,6 +70,20 @@ bool MyDataBase::createTableElements(){
     }
 }
 
+bool MyDataBase::createTableItems(){
+    QSqlQuery query(m_db);
+    if(query.exec("CREATE TABLE " TABLE_ITEMS " ( "  ITEMS_DOC   " INTEGER, "
+                                                     ITEMS_NUM   " INTEGER, "
+                                                     ITEMS_COUNT " DOUBLE)"
+                  )){
+        return true;
+    }else{
+        QMessageBox::information(0,"Error Database", tr("Не удалось создать таблицу данных"));
+        return false;
+    }
+}
+
+
 bool MyDataBase::select(const QString& table, QList<QList<QVariant>> &data){
     QSqlQuery query(m_db);
     int eCount;                                         //количество элементов заголовка
@@ -87,14 +101,25 @@ bool MyDataBase::select(const QString& table, QList<QList<QVariant>> &data){
     if(query.exec()){
         while(query.next()){
             QList<QVariant> vect;
-            for(int i = 0; i < eCount; ++i)
+            for(int i = 0; i < eCount; ++i){
                 vect<<query.value(i);
+            }
+            if(table == TABLE_ELEMENTS){
+                QSqlQuery query2(m_db);
+                query2.prepare("SELECT " ITEMS_NUM ", " ITEMS_COUNT " FROM " TABLE_ITEMS " WHERE " ITEMS_DOC " = :Doc");
+                query2.bindValue(":Doc", query.value(0).toLongLong());
+                if(!query2.exec())
+                    return false;
+                while (query2.next()) {
+                    vect<<query2.value(0)<<query2.value(1);
+                }
+            }
             data<<vect;
         }
         return true;
     }else{
        return false;
-    }
+    }    
 }
 
 bool MyDataBase::insertIntoTable(const QString& table, const QList<QVariant> &data){
@@ -124,17 +149,34 @@ bool MyDataBase::insertIntoTable(const QString& table, const QList<QVariant> &da
                         );
         query.bindValue(":Parent", data.value(1).toLongLong());
         query.bindValue(":Dir", data.value(2).toLongLong());
-        query.bindValue(":Date", data.value(3).toLongLong());
-        query.bindValue(":Name", data.value(4).toLongLong());
-        query.bindValue(":Price", data.value(5).toString());
-        query.bindValue(":OutPut", data.value(6).toString());
+        query.bindValue(":Date", data.value(3).toString());
+        query.bindValue(":Name", data.value(4).toString());
+        query.bindValue(":Price", data.value(5).toDouble());
+        query.bindValue(":OutPut", data.value(6).toDouble());
         query.bindValue(":Portion", data.value(7).toDouble());
 
     }else{
         return false;
     }
-    if(query.exec())
+    if(query.exec()){
+        if(table == TABLE_ELEMENTS){
+            qlonglong doc = getLastNumNumber(TABLE_ELEMENTS);
+            for(int i = 8; i < data.count(); i+=2){
+            query.clear();
+            query.prepare("INSERT INTO " TABLE_ITEMS " ( "  ITEMS_DOC ", "
+                                                               ITEMS_NUM ", "
+                                                               ITEMS_COUNT ") "
+                                      "VALUES (:Doc, :Num, :Count)"
+                            );
+            query.bindValue(":Doc", doc);
+            query.bindValue(":Num", data.value(i).toLongLong());
+            query.bindValue(":Count", data.value(i+1).toDouble());
+            if(!query.exec())
+                return false;
+            }
+        }
         return true;
+    }
     else
         return false;
 }
