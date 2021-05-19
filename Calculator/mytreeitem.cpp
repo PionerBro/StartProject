@@ -1,38 +1,53 @@
 #include "mytreeitem.h"
 #include <QDebug>
 
+template <int pos>
 static bool compare(const MyTreeItem* first, const MyTreeItem* second){
-    if(first->data(3).toString()<second->data(3).toString())
+    if(first->data(pos).toString()<second->data(pos).toString())
         return true;
-    else if(first->data(3).toString()>second->data(3).toString())
+    else if(first->data(pos).toString()>second->data(pos).toString())
         return false;
     else
         return true;
 }
 
 MyTreeItem::MyTreeItem(const QList<QVariant> &data, MyTreeItem* parent)
-{
-    itemData = data;
+{   
     parentItem = parent;
-    folder = false;
-    isOpen = false;
+    if(data.isEmpty()){
+        folder=true;
+        isOpen=true;
+    }else{
+        itemData = data;
+        isOpen = false;
+        if(data.value(2).toLongLong()){
+            folder = true;
+            MyTreeItem* item = new MyTreeItem({}, parent);
+            item->setRowData(data);
+            appendChild(item);
+        }else{
+            folder = false;
+        }
+    }
 }
 
 MyTreeItem::~MyTreeItem(){
+    qDebug()<<"Delete TreeItem"<<itemData.value(0);
     qDeleteAll(childItems);
 }
+
 
 void MyTreeItem::sortItem(){
     if(parentItem){
         if((childItems.count() > 1)){
             MyTreeItem* tmp = childItems.value(0);
             childItems.removeFirst();
-            std::sort(childItems.begin(), childItems.end(), compare);
+            std::sort(childItems.begin(), childItems.end(), compare<3>);
             childItems.push_front(tmp);
         }
     }else{
         if(!childItems.isEmpty()){
-            std::sort(childItems.begin(), childItems.end(), compare);
+            std::sort(childItems.begin(), childItems.end(), compare<3>);
         }
     }
 }

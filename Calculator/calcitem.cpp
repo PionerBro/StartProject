@@ -136,7 +136,7 @@ void CalcItem::setupCalcItem(){
     table->setItemDelegateForColumn(3, delegate);
     table->setItemDelegateForColumn(4, delegate);
     table->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::DoubleClicked);
-    connect(btnAddRow, SIGNAL(clicked()), table, SLOT(btnAddRowClicked()));
+    connect(btnAddRow, SIGNAL(clicked()), this, SLOT(btnAddRowClicked()));
     connect(table, SIGNAL(cellChanged(int,int)), this, SLOT(dataChanged(int,int)));
     vbx->addWidget(table);
     QHBoxLayout* hbxSize = new QHBoxLayout;
