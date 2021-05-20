@@ -27,6 +27,7 @@ public:
 private:
     void setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent);
 
+    int sortCol;
     QList<QVariant> m_header;
     MyTreeItem*     rootItem;
     MyTreeItem*     root;

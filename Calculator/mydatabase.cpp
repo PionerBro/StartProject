@@ -6,6 +6,8 @@
 #include <QVariant>
 #include <QList>
 
+#include <QDebug>
+
 MyDataBase::MyDataBase(QObject *parent) : QObject(parent)
 {
 
@@ -102,7 +104,10 @@ bool MyDataBase::select(const QString& table, QList<QList<QVariant>> &data){
         while(query.next()){
             QList<QVariant> vect;
             for(int i = 0; i < eCount; ++i){
-                vect<<query.value(i);
+                //if(i == 5 && TABLE_MATERIALS){
+                  //  vect<<QString::number(query.value(i).toDouble(),'f',2);
+                //}else
+                    vect<<query.value(i);
             }
             if(table == TABLE_ELEMENTS){
                 QSqlQuery query2(m_db);
@@ -238,11 +243,35 @@ bool MyDataBase::updateTableItem(const QString& table, const QList<QVariant> &da
         query.bindValue(":Price", data.value(5));
         query.bindValue(":OutPut", data.value(6));
         query.bindValue(":Portion", data.value(7));
-        query.bindValue(":id", data.value(0));
+        query.bindValue(":id", data.value(0));       
     }else
         return false;
-    if(query.exec())
+    if(query.exec()){
+        if(table == TABLE_ELEMENTS){
+            query.clear();
+            int doc = data.value(0).toDouble();
+            if(!query.exec("DELETE FROM " TABLE_ITEMS " WHERE " ITEMS_DOC " = " + QString::number(doc))){
+                qDebug()<<"Ошибка удаления данных из TABLE_ITEMS";
+                return false;
+            }
+            for(int i = 8; i < data.count(); i+=2){
+            query.clear();
+            query.prepare("INSERT INTO " TABLE_ITEMS " ( "  ITEMS_DOC ", "
+                                                               ITEMS_NUM ", "
+                                                               ITEMS_COUNT ") "
+                                      "VALUES (:Doc, :Num, :Count)"
+                            );
+            query.bindValue(":Doc", doc);
+            query.bindValue(":Num", data.value(i).toLongLong());
+            query.bindValue(":Count", data.value(i+1).toDouble());
+            if(!query.exec()){
+                qDebug()<<"Ошибка внесения данных в TABLE_ITEMS";
+                return false;
+                }
+            }
+        }
         return true;
+    }
     else
         return false;
 }

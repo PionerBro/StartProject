@@ -1,6 +1,8 @@
 #include "mytreemodel.h"
 #include "mytreeitem.h"
 #include "mydatabase.h"
+#include "directorywidget.h"
+#include <QIcon>
 
 #include <QDebug>
 
@@ -15,6 +17,11 @@ MyTreeModel::MyTreeModel(const QList<QVariant> &data, const QString& table, QObj
 
     db.select(sqlTable, list);
     setupModelData(list, root);
+
+    if(table == TABLE_ELEMENTS)
+        sortCol = 4;
+    else if(table == TABLE_MATERIALS)
+        sortCol = 3;
 }
 
 MyTreeModel::~MyTreeModel(){
@@ -23,11 +30,34 @@ MyTreeModel::~MyTreeModel(){
 
 QVariant MyTreeModel::data(const QModelIndex& index, int role)const{
     if(!index.isValid())
-        return QVariant();
-    if(role != Qt::DisplayRole)
-        return QVariant();
-    MyTreeItem *item = static_cast<MyTreeItem*>(index.internalPointer());
-    return item->data(index.column());
+           return QVariant();
+
+    if(index.column()==0){
+        if(role != Qt::DecorationRole)
+            return QVariant();
+        MyTreeItem *item = static_cast<MyTreeItem*>(index.internalPointer());
+        if(item->data(2).toLongLong()){
+            if(item->isOpen)
+                return QIcon("blue3.jpg").pixmap(QSize(25,25));
+            else
+                return QIcon("yellow2.png").pixmap(QSize(25,25));
+        }else{
+            return QIcon("blue1.png").pixmap(QSize(25,25));
+        }
+    }else if(index.column() == sortCol){
+        if(role!=Qt::DisplayRole)
+            return QVariant();
+        MyTreeItem *item = static_cast<MyTreeItem*>(index.internalPointer());
+           return item->data(index.column());
+    }else{
+        if(role != Qt::DisplayRole)
+            return QVariant();
+        MyTreeItem *item = static_cast<MyTreeItem*>(index.internalPointer());
+        if(item->data(2).toLongLong())
+            return QVariant();
+        else
+            return item->data(index.column());
+    }
 }
 
 Qt::ItemFlags MyTreeModel::flags(const QModelIndex &index)const{
@@ -51,7 +81,6 @@ QModelIndex MyTreeModel::index(int row, int column, const QModelIndex &parent)co
     else
         return QModelIndex();
 }
-
 QVariant MyTreeModel::headerData(int section, Qt::Orientation orientation, int role) const{
     if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return m_header.value(section);
@@ -122,6 +151,8 @@ void MyTreeModel::rootItemChanged(QModelIndex index){
         QList<QVariant> data;
         data = item->rowData();
         emit sendData(data);
+        //if(sqlTable == TABLE_MATERIALS)
+        //    static_cast<DirectoryWidget*>(QAbstractItemModel::parent())->accept();
     }
     endResetModel();
 }

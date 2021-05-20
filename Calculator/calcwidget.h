@@ -18,10 +18,11 @@ private:
 private:
     QTableView* view;
     MyTreeModel* model;
+public slots:
+    void editItem();
 private slots:
     void createItem();
     void createFolder();
-    void editItem();
     void deleteItem();
     void selectItem();
     void addNewElement(QList<QVariant>&,MyTreeItem*);

@@ -23,6 +23,7 @@ public:
     void appendChild(MyTreeItem* child);
     bool folder;
     bool isOpen;
+    int sortCol;
 protected:
     QList<QVariant> itemData;
     QList<MyTreeItem*> childItems;

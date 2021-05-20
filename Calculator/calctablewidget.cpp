@@ -14,6 +14,8 @@
 
 #include <QDebug>
 
+extern DirectoryWidget* dirWidget;
+
 CalcTableWidget::CalcTableWidget(QWidget* parent):QTableWidget(parent)
 {
 
@@ -55,14 +57,16 @@ void CalcTableWidget::addNewRow(){
 void CalcTableWidget::cellWidgetButtonClicked(){
     QPushButton* sender = static_cast<QPushButton*>(QObject::sender());         //get button object, which clicked
     setCurrentCell(static_cast<CellWidget*>(sender->parent())->row(), 0);       //setCurRow(static_cast<CellWidget*>(sender->parent())->row());               //set current row variable
-    DirectoryWidget* dirWidget = new DirectoryWidget(sender);                   //create numenclature Dialog widget
+    //DirectoryWidget* dirWidget = new DirectoryWidget(sender);                   //create numenclature Dialog widget
     connect(dirWidget->getModel(), SIGNAL(sendData(QList<QVariant>&)), this, SLOT(setRowData(QList<QVariant>&))); //when element is chosen emit signal with element's data
-
+    connect(dirWidget->getModel(), SIGNAL(sendData(QList<QVariant>&)), dirWidget, SLOT(accept()));
     if(dirWidget->exec()){
         qDebug()<<"good";
     }else{
         qDebug()<<"bad";
     }
+    disconnect(dirWidget->getModel(), SIGNAL(sendData(QList<QVariant>&)), this, SLOT(setRowData(QList<QVariant>&)));
+    disconnect(dirWidget->getModel(), SIGNAL(sendData(QList<QVariant>&)), dirWidget, SLOT(accept()));
 }
 
 void CalcTableWidget::setRowData(QList<QVariant>& data){
@@ -116,7 +120,7 @@ bool CalcTableWidget::event(QEvent* e){
 
 void CalcTableWidget::setDataAtIndex(int row, int col, const QVariant &data){
     QTableWidgetItem* item = new QTableWidgetItem();
-    item->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
-    item->setData(Qt::DisplayRole, data);
+    //item->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
+    item->setData(Qt::EditRole, QString::number(data.toDouble(), 'f', 2));
     setItem(row,col,item);
 }

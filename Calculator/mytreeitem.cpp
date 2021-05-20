@@ -1,11 +1,12 @@
 #include "mytreeitem.h"
 #include <QDebug>
 
-template <int pos>
 static bool compare(const MyTreeItem* first, const MyTreeItem* second){
-    if(first->data(pos).toString()<second->data(pos).toString())
+    QString firstS = first->data(first->sortCol).toString().toUpper();
+    QString secondS = second->data(second->sortCol).toString().toUpper();
+    if(firstS < secondS)
         return true;
-    else if(first->data(pos).toString()>second->data(pos).toString())
+    else if(firstS > secondS)
         return false;
     else
         return true;
@@ -14,6 +15,7 @@ static bool compare(const MyTreeItem* first, const MyTreeItem* second){
 MyTreeItem::MyTreeItem(const QList<QVariant> &data, MyTreeItem* parent)
 {   
     parentItem = parent;
+    sortCol = (data.count() == 6) ? 3 : 4;
     if(data.isEmpty()){
         folder=true;
         isOpen=true;
@@ -42,12 +44,12 @@ void MyTreeItem::sortItem(){
         if((childItems.count() > 1)){
             MyTreeItem* tmp = childItems.value(0);
             childItems.removeFirst();
-            std::sort(childItems.begin(), childItems.end(), compare<3>);
+            std::sort(childItems.begin(), childItems.end(), compare);
             childItems.push_front(tmp);
         }
     }else{
         if(!childItems.isEmpty()){
-            std::sort(childItems.begin(), childItems.end(), compare<3>);
+            std::sort(childItems.begin(), childItems.end(), compare);
         }
     }
 }

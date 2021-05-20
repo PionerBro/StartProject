@@ -17,8 +17,9 @@
 
 DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(parent, f)
 {
-    setAttribute(Qt::WA_DeleteOnClose);
+    //setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowFlag(Qt::WindowMaximizeButtonHint, true);
+    resize(400, 200);
     QVBoxLayout* vbx = new QVBoxLayout(this);
     QToolBar* toolBar = new QToolBar(this);
     QAction* newAct = new QAction("new", toolBar);
@@ -47,12 +48,12 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     vbx->addWidget(toolBar);
     vbx->addWidget(view);
     QList<QVariant> header;
-    header<<"Num"
+    header<<""
            <<"Parent"
            <<"Folder"
-           <<"Name"
-           <<"Unit"
-           <<"Price";
+           <<"Наименование"
+           <<"Ед.Изм."
+           <<"Цена";
     model = new MyTreeModel(header, TABLE_MATERIALS, this);
     view->setModel(model);
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
@@ -65,8 +66,8 @@ DirectoryWidget::~DirectoryWidget(){
 
 void DirectoryWidget::viewSettings(){
     view->setSelectionMode(QAbstractItemView::SingleSelection);
-    //view->setColumnHidden(0,true);
-    //view->setColumnHidden(2,true);
+    view->setColumnHidden(1,true);
+    view->setColumnHidden(2,true);
     //view->setColumnHidden(3,true);
 
     view->resizeColumnsToContents();

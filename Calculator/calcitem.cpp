@@ -35,11 +35,11 @@ CalcItem::CalcItem(MyTreeItem* itemP, int type, QWidget* parent, Qt::WindowFlags
         dirNum = -1;
         setupCalcFolder();
     }
-    if(!itemP->data(0).toLongLong() || itemP->data(2).toLongLong()){
+    if(!itemP->data(0).toLongLong() || itemP->data(2).toLongLong()){ //если ItemP это каталог
         num = 0;
-        parentNum = parentItem->data(2).toLongLong();
+        parentNum = parentItem->data(2).toLongLong();                //то создаем новый элемент или каталог где ItemP это parent
     }else{
-        num = parentItem->data(0).toULongLong();
+        num = parentItem->data(0).toLongLong();                      //иначе это уже созданный объект, которы мы изменяем
         parentNum = parentItem->data(1).toLongLong();
         dirNum = parentItem->data(2).toLongLong();
         nameEdit->setText(parentItem->data(4).toString());
@@ -49,7 +49,8 @@ CalcItem::CalcItem(MyTreeItem* itemP, int type, QWidget* parent, Qt::WindowFlags
             portionEdit->setText(parentItem->data(7).toString());
             for(int i = 8, j = 0; i<parentItem->rowData().count(); i+=2, ++j){
                 QList<QList<QVariant>> list;
-                db.selectAtNum(parentItem->data(i).toLongLong(), TABLE_MATERIALS, list);
+                if(!db.selectAtNum(parentItem->data(i).toLongLong(), TABLE_MATERIALS, list))
+                    close();
                 QList<QVariant> listData = list.value(0);
                 table->addNewRow();
                 table->setRowData(listData);

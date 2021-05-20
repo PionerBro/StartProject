@@ -15,14 +15,18 @@
 
 CalcWidget::CalcWidget(QWidget *parent) : QWidget(parent)
 {
+    setWindowFlag(Qt::WindowMaximizeButtonHint);
+    setWindowFlag(Qt::WindowMinimizeButtonHint);
+    setWindowFlag(Qt::WindowCloseButtonHint);
+    resize(800,400);
     QToolBar* tool = new QToolBar("mew", this);
-    QAction* act = new QAction("New", tool);
+    QAction* act = new QAction(QIcon("newFile.jpg").pixmap(25,25), "", tool);
     tool->addAction(act);
     connect(act, SIGNAL(triggered()), this, SLOT(createItem()));
-    QAction* act2 = new QAction("Edit", tool);
+    QAction* act2 = new QAction(QIcon("EditFile.png").pixmap(25,25),"", tool);
     tool->addAction(act2);
     connect(act2, SIGNAL(triggered()), this, SLOT(editItem()));
-    QAction* act3 = new QAction("CreateFolder", tool);
+    QAction* act3 = new QAction(QIcon("folder2.png").pixmap(25,25), "", tool);
     tool->addAction(act3);
     connect(act3, SIGNAL(triggered()), this, SLOT(createFolder()));
     QVBoxLayout* vbx = new QVBoxLayout(this);
@@ -30,29 +34,32 @@ CalcWidget::CalcWidget(QWidget *parent) : QWidget(parent)
     vbx->addWidget(tool);
     vbx->addWidget(view);
     QList<QVariant> list;
-    list <<"Num"
+    list <<""
          <<"Parent"
          <<"Dir"
-         <<"Date"
-         <<"Name"
-         <<"Price"
+         <<"Дата"
+         <<"Наименование"
+         <<"Цена"
          <<"OutPut"
          <<"Portion";
 
     model = new MyTreeModel(list, TABLE_ELEMENTS, this);
     view->setModel(model);
     viewSettings();
-    connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
+    connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));    
+    connect(model, SIGNAL(sendData(QList<QVariant>&)), this, SLOT(editItem()));
 }
 
 void CalcWidget::viewSettings(){
-    //view->setColumnHidden(1,true);
-    //view->setColumnHidden(2,true);
-    //view->setColumnHidden(6,true);
-    //view->setColumnHidden(7,true);
+    view->setColumnHidden(1,true);
+    view->setColumnHidden(2,true);
+    view->setColumnHidden(6,true);
+    view->setColumnHidden(7,true);
     view->horizontalHeader()->setStretchLastSection(true);
     view->setSelectionBehavior(QAbstractItemView::SelectRows);
     view->setSelectionMode(QAbstractItemView::SingleSelection);
+    view->setColumnWidth(0, 30);
+    view->setColumnWidth(5,200);
 }
 
 void CalcWidget::createItem(){
