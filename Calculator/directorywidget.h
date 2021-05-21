@@ -19,13 +19,22 @@ private:
     MyTreeModel* model;
 
     void viewSettings();
-
+    QAction* newAct;
+    QAction* editAct;
+    QAction* newFolder;
+    QAction* delItem;
+    QAction* selItem;
+    QAction* chTypeModel;
+    QAction* editListAct;
+    QAction* acceptAct;
 private slots:
     void createItem();
     void createFolder();
     void editItem();
     void deleteItem();
     void selectItem();
+    void chTypeModelSlot(bool);
+    void editListActSlot(bool);
 };
 
 #endif // DIRECTORYWIDGET_H

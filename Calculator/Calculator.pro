@@ -20,6 +20,7 @@ SOURCES += \
     mainwindow.cpp \
     mydatabase.cpp \
     mydoublevalidator.cpp \
+    myitemdelegate.cpp \
     myprintwidget.cpp \
     myprintwidgetdelegate.cpp \
     myprintwidgettable.cpp \
@@ -38,6 +39,7 @@ HEADERS += \
     mainwindow.h \
     mydatabase.h \
     mydoublevalidator.h \
+    myitemdelegate.h \
     myprintwidget.h \
     myprintwidgetdelegate.h \
     myprintwidgettable.h \

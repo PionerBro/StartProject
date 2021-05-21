@@ -4,12 +4,17 @@
 #include <QAbstractItemModel>
 
 class MyTreeItem;
-
+class MyItemDelegate;
 
 class MyTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
+    enum MyRoleNames{
+        ReserveData = Qt::UserRole+1
+    };
+    Q_ENUM(MyRoleNames)
+
     MyTreeModel(const QList<QVariant> &data, const QString&, QObject* parent = 0);
     ~MyTreeModel();
 
@@ -28,12 +33,23 @@ private:
     void setupModelData(const QList<QList<QVariant>> &lines, MyTreeItem* parent);
 
     int sortCol;
+    bool treeModelType = false;
+    bool colIsEditable = false;
     QList<QVariant> m_header;
     MyTreeItem*     rootItem;
     MyTreeItem*     root;
     QString         sqlTable;
+    MyItemDelegate* delegate;
+    QVector<MyTreeItem*> tableItems;
+    QVector<QVariant> reserveData;
+    QVector<bool> reserveCh;
 signals:
     void sendData(QList<QVariant>&);
+    void reserveDataChange(bool);
+public slots:
+    void setTreeModelType(bool);
+    void setEditableCol(bool);
+    void reserveDataChanged(int, const QString& text);
 private slots:
     void rootItemChanged(QModelIndex index);
 };

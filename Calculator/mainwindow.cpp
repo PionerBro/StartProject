@@ -40,15 +40,21 @@ MainWindow::MainWindow(QWidget *parent)
     //calcWidget->setStyleSheet("background-color: #1f4037; color: #ffff4d");
     //dirWidget->setStyleSheet("background-color: #1f4037; color: #ffff4d");
     QMenu* menu = new QMenu(tr("Журналы"), this);
+    QMenu* menuLists = new QMenu(tr("Списки"),this);
     menuBar()->addMenu(menu);
+    menuBar()->addMenu(menuLists);
     QAction* actCalcJournal = new QAction(tr("Калькуляции"), menu);
     QAction* actDirItemsJournal = new QAction(tr("Сырье"), menu);
+    QAction* actDirItemsLists = new QAction(tr("Цена сырья"),this);
     menu->addAction(actCalcJournal);
     menu->addAction(actDirItemsJournal);
+    menuLists->addAction(actDirItemsLists);
+
     connect(actCalcJournal, SIGNAL(triggered()), calcWidget, SLOT(show()));
     connect(actDirItemsJournal, SIGNAL(triggered()), dirWidget, SLOT(show()));
-    //CalcWidget* widget = new CalcWidget(this);
-    //setCentralWidget(widget);
+    //connect(actDirItemsLists, SIGNAL(triggered()), );
+
+
 }
 
 

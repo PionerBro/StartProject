@@ -4,6 +4,7 @@
 #include "diritem.h"
 #include "calcitem2delegate.h"
 #include "mydatabase.h"
+#include "myitemdelegate.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -19,31 +20,39 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
 {
     //setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowFlag(Qt::WindowMaximizeButtonHint, true);
-    resize(400, 200);
+    resize(400, 400);
     QVBoxLayout* vbx = new QVBoxLayout(this);
     QToolBar* toolBar = new QToolBar(this);
-    QAction* newAct = new QAction("new", toolBar);
+    newAct = new QAction(QIcon("newFile.jpg").pixmap(25,25),"new", toolBar);
+    editAct = new QAction(QIcon("EditFile.png").pixmap(25,25),"edit", toolBar);
+    newFolder = new QAction(QIcon("folder2.png").pixmap(25,25),"newFolder", toolBar);
+    delItem = new QAction("delete", toolBar);
+    selItem = new QAction("selectItem", toolBar);
+    chTypeModel = new QAction(QIcon("typeModel5.png").pixmap(25,25),"chTypeModel",toolBar);
+    editListAct = new QAction("EditList", toolBar);
+    acceptAct = new QAction("Accept", toolBar);
     newAct->setShortcut(Qt::Key_Insert);
-    connect(newAct, SIGNAL(triggered()),this, SLOT(createItem()));
-    QAction* editAct = new QAction("edit", toolBar);
     editAct->setShortcut(Qt::Key_F4);
-    connect(editAct, SIGNAL(triggered()), this, SLOT(editItem()));
-    QAction* newFolder = new QAction("newFolder", toolBar);
-    connect(newFolder, SIGNAL(triggered()), this, SLOT(createFolder()));
-    QAction* delItem = new QAction("delete", toolBar);
     delItem->setShortcut(Qt::Key_Delete);
-    connect(delItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
-    QAction* selItem = new QAction("selectItem", toolBar);
     QList<QKeySequence> shCuts;
     shCuts<<Qt::Key_Enter<<Qt::Key_Return;
+    newAct->setEnabled(false);
+    editAct->setEnabled(false);
+    newFolder->setEnabled(false);
+    delItem->setEnabled(false);
+    selItem->setEnabled(false);
     selItem->setShortcuts(shCuts);
-    connect(selItem, SIGNAL(triggered()), this, SLOT(selectItem()));
+    chTypeModel->setCheckable(true);
+    editListAct->setCheckable(true);
+    acceptAct->setEnabled(false);
     toolBar->addAction(newAct);
     toolBar->addAction(editAct);
     toolBar->addAction(newFolder);
     toolBar->addAction(delItem);
     toolBar->addAction(selItem);
-
+    toolBar->addAction(chTypeModel);
+    toolBar->addAction(editListAct);
+    toolBar->addAction(acceptAct);
     view = new QTableView(this);
     vbx->addWidget(toolBar);
     vbx->addWidget(view);
@@ -53,11 +62,21 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
            <<"Folder"
            <<"Наименование"
            <<"Ед.Изм."
-           <<"Цена";
+           <<"Цена"
+            <<"";
+
     model = new MyTreeModel(header, TABLE_MATERIALS, this);
     view->setModel(model);
-    connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
     viewSettings();
+    connect(newAct, SIGNAL(triggered()),this, SLOT(createItem()));
+    connect(editAct, SIGNAL(triggered()), this, SLOT(editItem()));
+    connect(newFolder, SIGNAL(triggered()), this, SLOT(createFolder()));
+    connect(delItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
+    connect(selItem, SIGNAL(triggered()), this, SLOT(selectItem()));
+    connect(chTypeModel, SIGNAL(toggled(bool)), this, SLOT(chTypeModelSlot(bool)));
+    connect(editListAct, SIGNAL(toggled(bool)), this, SLOT(editListActSlot(bool)));
+    connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
+    connect(model, SIGNAL(reserveDataChange(bool)), acceptAct, SLOT(setEnabled(bool)));
 }
 
 DirectoryWidget::~DirectoryWidget(){
@@ -68,8 +87,9 @@ void DirectoryWidget::viewSettings(){
     view->setSelectionMode(QAbstractItemView::SingleSelection);
     view->setColumnHidden(1,true);
     view->setColumnHidden(2,true);
-    //view->setColumnHidden(3,true);
+    view->setColumnHidden(6,true);
 
+    view->setItemDelegateForColumn(5, new MyItemDelegate(this));
     view->resizeColumnsToContents();
     view->horizontalHeader()->setStretchLastSection(true);
     view->setCurrentIndex(model->index(0,1,QModelIndex()));
@@ -133,3 +153,20 @@ MyTreeModel* DirectoryWidget::getModel()const{
     return model;
 }
 
+void DirectoryWidget::chTypeModelSlot(bool b){
+    model->setTreeModelType(b);
+    newAct->setEnabled(b);
+    editAct->setEnabled(b);
+    newFolder->setEnabled(b);
+    delItem->setEnabled(b);
+    selItem->setEnabled(b);
+    editListAct->setEnabled(!b);
+}
+
+void DirectoryWidget::editListActSlot(bool b){
+    chTypeModel->setEnabled(!b);
+    model->setEditableCol(b);
+    view->setColumnHidden(6, !b);
+    if(acceptAct->isEnabled())
+        acceptAct->setEnabled(b);
+}

@@ -21,14 +21,14 @@ CalcWidget::CalcWidget(QWidget *parent) : QWidget(parent)
     resize(800,400);
     QToolBar* tool = new QToolBar("mew", this);
     QAction* act = new QAction(QIcon("newFile.jpg").pixmap(25,25), "", tool);
-    tool->addAction(act);
-    connect(act, SIGNAL(triggered()), this, SLOT(createItem()));
     QAction* act2 = new QAction(QIcon("EditFile.png").pixmap(25,25),"", tool);
-    tool->addAction(act2);
-    connect(act2, SIGNAL(triggered()), this, SLOT(editItem()));
     QAction* act3 = new QAction(QIcon("folder2.png").pixmap(25,25), "", tool);
+    QAction* act4 = new QAction(QIcon("typeModel5.png").pixmap(25,25),"",tool);
+    act4->setCheckable(true);
+    tool->addAction(act);
+    tool->addAction(act2);
     tool->addAction(act3);
-    connect(act3, SIGNAL(triggered()), this, SLOT(createFolder()));
+    tool->addAction(act4);
     QVBoxLayout* vbx = new QVBoxLayout(this);
     view = new QTableView(this);
     vbx->addWidget(tool);
@@ -46,8 +46,14 @@ CalcWidget::CalcWidget(QWidget *parent) : QWidget(parent)
     model = new MyTreeModel(list, TABLE_ELEMENTS, this);
     view->setModel(model);
     viewSettings();
+
+    connect(act, SIGNAL(triggered()), this, SLOT(createItem()));
+    connect(act2, SIGNAL(triggered()), this, SLOT(editItem()));
+    connect(act3, SIGNAL(triggered()), this, SLOT(createFolder()));
+    connect(act4, SIGNAL(toggled(bool)), model, SLOT(setTreeModelType(bool)));
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));    
     connect(model, SIGNAL(sendData(QList<QVariant>&)), this, SLOT(editItem()));
+    //act4->toggle();
 }
 
 void CalcWidget::viewSettings(){
