@@ -20,10 +20,10 @@ CalcWidget::CalcWidget(QWidget *parent) : QWidget(parent)
     setWindowFlag(Qt::WindowCloseButtonHint);
     resize(800,400);
     QToolBar* tool = new QToolBar("mew", this);
-    QAction* act = new QAction(QIcon("newFile.jpg").pixmap(25,25), "", tool);
-    QAction* act2 = new QAction(QIcon("EditFile.png").pixmap(25,25),"", tool);
-    QAction* act3 = new QAction(QIcon("folder2.png").pixmap(25,25), "", tool);
-    QAction* act4 = new QAction(QIcon("typeModel5.png").pixmap(25,25),"",tool);
+    QAction* act = new QAction(QIcon("../Calculator/newFile.jpg").pixmap(25,25), "", tool);
+    QAction* act2 = new QAction(QIcon("../Calculator/EditFile.png").pixmap(25,25),"", tool);
+    QAction* act3 = new QAction(QIcon("../Calculator/folder2.png").pixmap(25,25), "", tool);
+    QAction* act4 = new QAction(QIcon("../Calculator/typeModel5.png").pixmap(25,25),"",tool);
     act4->setCheckable(true);
     tool->addAction(act);
     tool->addAction(act2);

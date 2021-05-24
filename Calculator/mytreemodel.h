@@ -43,15 +43,21 @@ private:
     QVector<MyTreeItem*> tableItems;
     QVector<QVariant> reserveData;
     QVector<bool> reserveCh;
+    QVector<bool> reserveAc;
+    QList<int> reserveNum;
 signals:
     void sendData(QList<QVariant>&);
     void reserveDataChange(bool);
+    void acceptIsComplete();
+    void rejectIsComplete();
 public slots:
     void setTreeModelType(bool);
     void setEditableCol(bool);
     void reserveDataChanged(int, const QString& text);
 private slots:
     void rootItemChanged(QModelIndex index);
+    void viewAcceptTriggered();
+    void viewRejectTriggered();
 };
 
 #endif // MYTREEMODEL_H

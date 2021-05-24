@@ -39,11 +39,11 @@ QVariant MyTreeModel::data(const QModelIndex& index, int role)const{
         MyTreeItem *item = static_cast<MyTreeItem*>(index.internalPointer());
         if(item->data(2).toLongLong()){
             if(item->isOpen)
-                return QIcon("blue3.jpg").pixmap(QSize(25,25));
+                return QIcon("../Calculator/blue3.jpg").pixmap(QSize(25,25));
             else
-                return QIcon("yellow2.png").pixmap(QSize(25,25));
+                return QIcon("../Calculator/yellow2.png").pixmap(QSize(25,25));
         }else{
-            return QIcon("blue1.png").pixmap(QSize(25,25));
+            return QIcon("../Calculator/blue1.png").pixmap(QSize(25,25));
         }
     }else if(index.column() == sortCol){
         if(role!=Qt::DisplayRole)
@@ -55,12 +55,15 @@ QVariant MyTreeModel::data(const QModelIndex& index, int role)const{
             return reserveData.value(index.row());
         return QVariant();
     }else if(index.column() == 6 && sqlTable==TABLE_MATERIALS){
-        if(role!=Qt::DisplayRole)
+        if(role!=Qt::BackgroundRole || reserveNum.isEmpty())
             return QVariant();
-        if(reserveCh.value(index.row()))
-            return "Edit";
-        else
+        else if(role == Qt::BackgroundRole && reserveCh.value(index.row())){
+            return QBrush(QColor(Qt::red));
+        }else if(role == Qt::BackgroundRole && reserveAc.value(index.row())){
+            return QBrush(QColor(Qt::green));
+        }else
             return QVariant();
+
     }else{
         if(role != Qt::DisplayRole)
             return QVariant();
@@ -104,6 +107,7 @@ QModelIndex MyTreeModel::index(int row, int column, const QModelIndex &parent)co
             return QModelIndex();
     }
 }
+
 QVariant MyTreeModel::headerData(int section, Qt::Orientation orientation, int role) const{
     if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return m_header.value(section);
@@ -123,6 +127,7 @@ QModelIndex MyTreeModel::parent(const QModelIndex &index)const{
         return QModelIndex();
     }
 }
+
 int MyTreeModel::rowCount(const QModelIndex &parent)const{
     if(treeModelType){
         MyTreeItem* parentItem;
@@ -333,22 +338,75 @@ void MyTreeModel::setTreeModelType(bool b){
     endResetModel();
 }
 
+//вызывается в виджете которому принадлежит модель, при нажатии кнопки на тулбаре
 void MyTreeModel::setEditableCol(bool b){
     beginResetModel();
-    colIsEditable = b;
-    reserveCh.fill(false,tableItems.count());
+    colIsEditable = b;                                              //устанавливаем флаг для метода data()
     if(b){
+        reserveCh.fill(false,tableItems.count());                       //заполняем резверную копию данными
         for(int i = 0; i<tableItems.count(); ++i){
             reserveData<<tableItems.value(i)->data(5);
         }
     }else{
         reserveData.clear();
+        reserveNum.clear();
+        reserveCh.clear();
+        reserveAc.clear();
     }
     endResetModel();
 }
 
+//вызывется в делегате при изменении данных в ячейке, передает строку в которой изменились данные и сам текст данных
 void MyTreeModel::reserveDataChanged(int row, const QString& text){
-    reserveData[row] = text;
-    reserveCh[row] = true;
+    if(!reserveAc.isEmpty()){
+        reserveAc.clear();
+        reserveNum.clear();
+    }
+    reserveData[row] = text;                                        //изменяем текст резервной копии
+    reserveCh[row] = true;                                          //устанавливем флаг изменения в списке флагов элементов(нужен в методе data(const QModelIndex& index, int role))
+    for(int i = 0; i < reserveNum.count(); ++i){
+        if(reserveNum.value(i) == row){
+            return;
+        }
+    }
+    reserveNum<<row;                                                //добавляем в список номеров элементов MyTreeItem новый элемент если его в этом списке нет
     emit reserveDataChange(true);
+}
+
+
+//Принятие обновления данных: данные резервной копии которые изменились становяться основными
+void MyTreeModel::viewAcceptTriggered(){
+
+    beginResetModel();
+    reserveAc.fill(false, tableItems.count());
+    for(int i = 0; i < reserveNum.count(); ++i){                                //reserveNum список номеров MytreeItem в tableitems которые были изменены
+        int num = reserveNum.value(i);
+        MyTreeItem* item = tableItems.value(num);
+        if(item->data(5).toDouble() != reserveData.value(num).toDouble()){      //получаем список данный элемента в базе, изменяем цену и обновляем
+            QList<QVariant> data = item->rowData();
+            data[5] = reserveData.value(num);
+            if(updateItem(item, data)){
+                reserveCh[num] = false;
+                reserveAc[num] = true;
+            }
+        }else{
+            reserveCh[num] = false;
+            reserveAc[num] = true;
+        }
+    }
+    emit acceptIsComplete();                                                    //сигнал для изменения доступности кнопок в тулбаре
+    endResetModel();
+}
+
+void MyTreeModel::viewRejectTriggered(){
+    beginResetModel();
+    reserveData.clear();
+    reserveCh.clear();
+    reserveNum.clear();
+    for(int i = 0; i<tableItems.count(); ++i){
+        reserveData<<tableItems.value(i)->data(5);
+    }
+    reserveCh.fill(false,tableItems.count());
+    emit rejectIsComplete();
+    endResetModel();
 }

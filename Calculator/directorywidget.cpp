@@ -23,14 +23,15 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     resize(400, 400);
     QVBoxLayout* vbx = new QVBoxLayout(this);
     QToolBar* toolBar = new QToolBar(this);
-    newAct = new QAction(QIcon("newFile.jpg").pixmap(25,25),"new", toolBar);
-    editAct = new QAction(QIcon("EditFile.png").pixmap(25,25),"edit", toolBar);
-    newFolder = new QAction(QIcon("folder2.png").pixmap(25,25),"newFolder", toolBar);
+    newAct = new QAction(QIcon("../Calculator/newFile.jpg").pixmap(25,25),"new", toolBar);
+    editAct = new QAction(QIcon("../Calculator/EditFile.png").pixmap(25,25),"edit", toolBar);
+    newFolder = new QAction(QIcon("../Calculator/folder2.png").pixmap(25,25),"newFolder", toolBar);
     delItem = new QAction("delete", toolBar);
     selItem = new QAction("selectItem", toolBar);
-    chTypeModel = new QAction(QIcon("typeModel5.png").pixmap(25,25),"chTypeModel",toolBar);
-    editListAct = new QAction("EditList", toolBar);
-    acceptAct = new QAction("Accept", toolBar);
+    chTypeModel = new QAction(QIcon("../Calculator/typeModel5.png").pixmap(25,25),"chTypeModel",toolBar);
+    editListAct = new QAction(QIcon("../Calculator/editStyle.png").pixmap(25,25),"EditList", toolBar);
+    acceptAct = new QAction(QIcon("../Calculator/acceptElem.png").pixmap(25,25),"Accept", toolBar);
+    rejectAct = new QAction(QIcon("../Calculator/editElem.png").pixmap(25,25),"Reject", toolBar);
     newAct->setShortcut(Qt::Key_Insert);
     editAct->setShortcut(Qt::Key_F4);
     delItem->setShortcut(Qt::Key_Delete);
@@ -45,6 +46,7 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     chTypeModel->setCheckable(true);
     editListAct->setCheckable(true);
     acceptAct->setEnabled(false);
+    rejectAct->setEnabled(false);
     toolBar->addAction(newAct);
     toolBar->addAction(editAct);
     toolBar->addAction(newFolder);
@@ -53,6 +55,7 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     toolBar->addAction(chTypeModel);
     toolBar->addAction(editListAct);
     toolBar->addAction(acceptAct);
+    toolBar->addAction(rejectAct);
     view = new QTableView(this);
     vbx->addWidget(toolBar);
     vbx->addWidget(view);
@@ -75,8 +78,12 @@ DirectoryWidget::DirectoryWidget(QWidget* parent, Qt::WindowFlags f):QDialog(par
     connect(selItem, SIGNAL(triggered()), this, SLOT(selectItem()));
     connect(chTypeModel, SIGNAL(toggled(bool)), this, SLOT(chTypeModelSlot(bool)));
     connect(editListAct, SIGNAL(toggled(bool)), this, SLOT(editListActSlot(bool)));
+    connect(acceptAct, SIGNAL(triggered()), model, SLOT(viewAcceptTriggered()));
+    connect(rejectAct, SIGNAL(triggered()), model, SLOT(viewRejectTriggered()));
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
-    connect(model, SIGNAL(reserveDataChange(bool)), acceptAct, SLOT(setEnabled(bool)));
+    connect(model, SIGNAL(reserveDataChange(bool)), this, SLOT(reserveDataChangedSlot(bool)));
+    connect(model, SIGNAL(acceptIsComplete()), this, SLOT(acceptActSlot()));
+    connect(model, SIGNAL(rejectIsComplete()), this, SLOT(rejectActSlot()));
 }
 
 DirectoryWidget::~DirectoryWidget(){
@@ -88,7 +95,7 @@ void DirectoryWidget::viewSettings(){
     view->setColumnHidden(1,true);
     view->setColumnHidden(2,true);
     view->setColumnHidden(6,true);
-
+    view->setEditTriggers(QAbstractItemView::AnyKeyPressed);
     view->setItemDelegateForColumn(5, new MyItemDelegate(this));
     view->resizeColumnsToContents();
     view->horizontalHeader()->setStretchLastSection(true);
@@ -167,6 +174,24 @@ void DirectoryWidget::editListActSlot(bool b){
     chTypeModel->setEnabled(!b);
     model->setEditableCol(b);
     view->setColumnHidden(6, !b);
-    if(acceptAct->isEnabled())
-        acceptAct->setEnabled(b);
+    //if(acceptAct->isEnabled())
+    //    acceptAct->setEnabled(b);
+}
+
+void DirectoryWidget::reserveDataChangedSlot(bool){
+    acceptAct->setEnabled(true);
+    rejectAct->setEnabled(true);
+    editListAct->setEnabled(false);
+}
+
+void DirectoryWidget::acceptActSlot(){
+    acceptAct->setEnabled(false);
+    rejectAct->setEnabled(false);
+    editListAct->setEnabled(true);
+}
+
+void DirectoryWidget::rejectActSlot(){
+    acceptAct->setEnabled(false);
+    rejectAct->setEnabled(false);
+    editListAct->setEnabled(true);
 }

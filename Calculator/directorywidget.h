@@ -27,6 +27,7 @@ private:
     QAction* chTypeModel;
     QAction* editListAct;
     QAction* acceptAct;
+    QAction* rejectAct;
 private slots:
     void createItem();
     void createFolder();
@@ -35,6 +36,9 @@ private slots:
     void selectItem();
     void chTypeModelSlot(bool);
     void editListActSlot(bool);
+    void reserveDataChangedSlot(bool);
+    void acceptActSlot();
+    void rejectActSlot();
 };
 
 #endif // DIRECTORYWIDGET_H
