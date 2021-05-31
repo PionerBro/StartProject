@@ -85,6 +85,19 @@ bool MyDataBase::createTableItems(){
     }
 }
 
+bool MyDataBase::createTableMaterialsPrices(){
+    QSqlQuery query(m_db);
+    if(query.exec("CREATE TABLE " TABLE_MATERIALS_PRICES " ( "  MATERIALS_PRICES_DOC   " INTEGER, "
+                                                     MATERIALS_PRICES_ID    " INTEGER, "
+                                                     MATERIALS_PRICES_DATE  " VARCHAR(10), "
+                                                     MATERIALS_PRICES_PRICE " DOUBLE)"
+                  )){
+        return true;
+    }else{
+        QMessageBox::information(0,"Error Database", tr("Не удалось создать таблицу данных"));
+        return false;
+    }
+}
 
 bool MyDataBase::select(const QString& table, QList<QList<QVariant>> &data){
     QSqlQuery query(m_db);
@@ -92,12 +105,16 @@ bool MyDataBase::select(const QString& table, QList<QList<QVariant>> &data){
     if(table == TABLE_MATERIALS){
         eCount = 6;
         query.prepare("SELECT* FROM " TABLE_MATERIALS);
-    }
-    else if(table == TABLE_ELEMENTS){
+    }else if(table == TABLE_MATERIALS_PRICES){
+        eCount = 4;
+        query.prepare("SELECT* FROM " TABLE_MATERIALS_PRICES);
+    }else if(table == TABLE_ELEMENTS){
         eCount = 8;
         query.prepare("SELECT* FROM " TABLE_ELEMENTS);
-    }
-    else
+    }/*else if(table == TABLE_ITEMS){
+        eCount = 3;
+        query.prepare("SELECT* FROM " TABLE_ITEMS);
+    }*/else
         return false;
 
     if(query.exec()){
@@ -142,6 +159,17 @@ bool MyDataBase::insertIntoTable(const QString& table, const QList<QVariant> &da
         query.bindValue(":Name", data.value(3).toString());
         query.bindValue(":Unit", data.value(4).toString());
         query.bindValue(":Price", data.value(5).toDouble());
+    }else if(table == TABLE_MATERIALS_PRICES){
+        query.prepare("INSERT INTO " TABLE_MATERIALS_PRICES " ( "  MATERIALS_PRICES_DOC ", "
+                                                           MATERIALS_PRICES_ID ", "
+                                                           MATERIALS_PRICES_DATE ", "
+                                                           MATERIALS_PRICES_PRICE ") "
+                                  "VALUES (:Doc, :id, :Date, :Price)"
+                        );
+        query.bindValue(":Doc", data.value(0).toLongLong());
+        query.bindValue(":id", data.value(1).toLongLong());
+        query.bindValue(":Date", data.value(2).toString());
+        query.bindValue(":Price", data.value(3).toDouble());
     }else if(table == TABLE_ELEMENTS){
         query.prepare("INSERT INTO " TABLE_ELEMENTS " ( "  ELEMENTS_PARENT ", "
                                                            ELEMENTS_DIR ", "
@@ -192,6 +220,8 @@ qlonglong MyDataBase::getLastNumNumber(const QString& table)const{
         query.prepare("SELECT count(*) FROM " TABLE_MATERIALS);
     }else if(table == TABLE_ELEMENTS){
         query.prepare("SELECT count(*) FROM " TABLE_ELEMENTS);
+    }else if(table == TABLE_MATERIALS_PRICES){
+        query.prepare("SELECT max( " MATERIALS_PRICES_DOC " ) FROM " TABLE_MATERIALS_PRICES);
     }else
         return false;
     if(query.exec()){
@@ -281,6 +311,8 @@ bool MyDataBase::selectAtNum(qlonglong num, const QString &table, QList<QList<QV
     int eCount;
     if(table == TABLE_MATERIALS)
         eCount = 6;
+    else if(table == TABLE_MATERIALS_PRICES)
+        eCount = 4;
     else if(table == TABLE_ELEMENTS)
         eCount = 8;
     else if(table == TABLE_ITEMS)

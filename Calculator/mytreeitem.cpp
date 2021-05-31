@@ -53,18 +53,23 @@ void MyTreeItem::sortItem(){
         }
     }
 }
+
 QList<QVariant> MyTreeItem::rowData() const{
     return itemData;
 }
+
 QVariant MyTreeItem::data(int column) const{
     return itemData.value(column);
 }
+
 MyTreeItem* MyTreeItem::child(int row){
     return childItems.value(row);
 }
+
 MyTreeItem* MyTreeItem::parent(){
     return parentItem;
 }
+
 int MyTreeItem::row() const{
     if(parentItem)
         return parentItem->childItems.indexOf(const_cast<MyTreeItem*>(this));

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QSqlDatabase>
 
-#define DATABASE_NAME "DataBase.db"
+#define DATABASE_NAME "../Calculator/DataBase.db"
 #define DATABASE_HOST "DataBaseHost"
 
 #define TABLE_MATERIALS  "TableMaterials"
@@ -14,6 +14,12 @@
 #define MATERIALS_NAME   "Name"
 #define MATERIALS_UNIT   "Unit"
 #define MATERIALS_PRICE  "Price"
+
+#define TABLE_MATERIALS_PRICES "TableMaterialsPrices"
+#define MATERIALS_PRICES_DOC    "Doc"
+#define MATERIALS_PRICES_ID     "id"            //idTableMaterials
+#define MATERIALS_PRICES_DATE   "Date"
+#define MATERIALS_PRICES_PRICE  "Price"
 
 #define TABLE_ELEMENTS   "TableElements"
 #define ELEMENTS_ID      "id"
@@ -26,15 +32,15 @@
 #define ELEMENTS_PORTION "Portion"
 
 #define TABLE_ITEMS      "TableItems"
-#define ITEMS_DOC        "Document"
-#define ITEMS_NUM        "id"
+#define ITEMS_DOC        "Document"             //id TableElements
+#define ITEMS_NUM        "id"                   //id TableMaterials
 #define ITEMS_COUNT      "Count"
 
 
 class MyDataBase : public QObject
 {
     Q_OBJECT
-public:
+public:    
     explicit MyDataBase(QObject *parent = nullptr);
 
     bool createConnection();
@@ -53,6 +59,7 @@ private:
     bool createTable();
     bool createTableElements();
     bool createTableItems();
+    bool createTableMaterialsPrices();
 signals:
 
 };

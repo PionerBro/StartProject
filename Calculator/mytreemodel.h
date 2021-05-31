@@ -4,7 +4,7 @@
 #include <QAbstractItemModel>
 
 class MyTreeItem;
-class MyItemDelegate;
+//class MyItemDelegate;
 
 class MyTreeModel : public QAbstractItemModel
 {
@@ -39,7 +39,7 @@ private:
     MyTreeItem*     rootItem;
     MyTreeItem*     root;
     QString         sqlTable;
-    MyItemDelegate* delegate;
+    //MyItemDelegate* delegate;
     QVector<MyTreeItem*> tableItems;
     QVector<QVariant> reserveData;
     QVector<bool> reserveCh;

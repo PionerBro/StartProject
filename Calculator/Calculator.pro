@@ -12,6 +12,15 @@ SOURCES += \
     calcitem.cpp \
     calcitem2delegate.cpp \
     calctablewidget.cpp \
+    calculatorcalculationsdialog.cpp \
+    calculatordatabase.cpp \
+    calculatormaterialsdelegate.cpp \
+    calculatormaterialsdialog.cpp \
+    calculatormaterialsitem.cpp \
+    calculatormaterialstreemodel.cpp \
+    calculatortreeitem.cpp \
+    calculatortreemodel.cpp \
+    calcultatorunitstablemodel.cpp \
     calcwidget.cpp \
     cellwidget.cpp \
     directorywidget.cpp \
@@ -32,6 +41,15 @@ HEADERS += \
     calcitem.h \
     calcitem2delegate.h \
     calctablewidget.h \
+    calculatorcalculationsdialog.h \
+    calculatordatabase.h \
+    calculatormaterialsdelegate.h \
+    calculatormaterialsdialog.h \
+    calculatormaterialsitem.h \
+    calculatormaterialstreemodel.h \
+    calculatortreeitem.h \
+    calculatortreemodel.h \
+    calcultatorunitstablemodel.h \
     calcwidget.h \
     cellwidget.h \
     directorywidget.h \

@@ -3,6 +3,7 @@
 #include "mydatabase.h"
 #include "directorywidget.h"
 #include <QIcon>
+#include <QDate>
 
 #include <QDebug>
 
@@ -379,13 +380,16 @@ void MyTreeModel::viewAcceptTriggered(){
 
     beginResetModel();
     reserveAc.fill(false, tableItems.count());
+    qlonglong docNum = db.getLastNumNumber(TABLE_MATERIALS_PRICES)+1;
     for(int i = 0; i < reserveNum.count(); ++i){                                //reserveNum список номеров MytreeItem в tableitems которые были изменены
         int num = reserveNum.value(i);
         MyTreeItem* item = tableItems.value(num);
         if(item->data(5).toDouble() != reserveData.value(num).toDouble()){      //получаем список данный элемента в базе, изменяем цену и обновляем
             QList<QVariant> data = item->rowData();
             data[5] = reserveData.value(num);
-            if(updateItem(item, data)){
+            QList<QVariant> dataPrices;
+            dataPrices<<docNum<<data.value(0)<<QDate().currentDate().toString("dd.MM.yyyy")<<data.value(5);
+            if(updateItem(item, data) && db.insertIntoTable(TABLE_MATERIALS_PRICES, dataPrices)){
                 reserveCh[num] = false;
                 reserveAc[num] = true;
             }
