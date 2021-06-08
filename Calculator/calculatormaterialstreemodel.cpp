@@ -1,12 +1,15 @@
 #include "calculatormaterialstreemodel.h"
 #include "calculatordatabase.h"
 #include "calculatortreeitem.h"
+#include "calculatormaterialshistorydialog.h"
 
 #include <QDebug>
 
+extern CalculatorMaterialsHistoryDialog* calcMatHistDialog;
+
 CalculatorMaterialsTreeModel::CalculatorMaterialsTreeModel(const QString& sqlTable, const QVector<QVariant>& headers, QObject* parent) : CalculatorTreeModel(sqlTable, headers, parent)
 {
-
+    historyModel = calcMatHistDialog->getModel();
 }
 
 
@@ -44,4 +47,15 @@ bool CalculatorMaterialsTreeModel::createDataBaseItem(const QString& tableName, 
     return true;
 }
 
-
+bool CalculatorMaterialsTreeModel::updateDataBaseItems(const QString& tableName, const QVector<QVector<QVariant>> &data, const QVariant& date){
+    QVector<QVector<QVariant>> vect;
+    for(int i = 0; i < data.count(); ++i){
+        vect.push_back({0,data.value(i).value(0),date.toString(),data.value(i).value(5)});
+        if(!m_db->updateTableItem(tableName, data.value(i)))
+            return false;
+    }
+    if(!historyModel->createModelItems(vect))
+        return false;
+    qDebug()<<"good";
+    return true;
+};

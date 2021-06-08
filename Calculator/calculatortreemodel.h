@@ -27,17 +27,17 @@ public:
     void sethHeaderData(QVector<QVariant>& headers);
     void setColumnEditable(int col, bool value = true);
     CalculatorTreeItem* currentRoot() const;
-    bool createModelItem(const QVector<QVariant>& data);
+    bool createModelItem(QVector<QVariant>& data);
     bool updateModelItem(const QVector<QVariant>& data, const QModelIndex& index);
     void setupModelData();
     void setCalculatorDatabase(CalculatorDatabase* db);
     bool getEditModeValue()const;
 private:
-    bool updateModelItems(const QVector<QVector<QVariant>> &data, const QVector<CalculatorTreeItem*> &items);
+    bool updateModelItems(const QVector<QVector<QVariant>> &data, const QVector<CalculatorTreeItem*> &items, const QVariant& date = QVariant());
     virtual bool selectDataBaseAll(const QString& tableName, QVector<QVector<QVariant>>& data);
     virtual bool createDataBaseItem(const QString& tableName, QVector<QVariant>& data);
     virtual bool updateDataBaseItem(const QString& tableName, const QVector<QVariant>& data);
-    virtual bool updateDataBaseItems(const QString& tableName, const QVector<QVector<QVariant>> &data);
+    virtual bool updateDataBaseItems(const QString& tableName, const QVector<QVector<QVariant>> &data, const QVariant& date = QVariant());
 protected:
     QVariant getReserveData(int row, int col) const;
     bool isEditableCol(int col) const;
@@ -64,7 +64,7 @@ public slots:
     void reserveDataChange(int row, int column, const QString& text);
 private slots:
     void rootItemChanged(QModelIndex index);
-    void reserveDataAccept();
+    void reserveDataAccept(const QVariant& date);
     void reserveDataReject();
 signals:
     void sendData(QVector<QVariant>&);

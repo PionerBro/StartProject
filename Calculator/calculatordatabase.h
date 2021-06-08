@@ -30,7 +30,7 @@
 #define ELEMENTS_TREE_OUTPUT  "OutPut"
 #define ELEMENTS_TREE_PORTION "Portion"
 
-#define TABLE_ITEMS      "TableItems"
+#define TABLE_ITEMS      "TableElementsTreeItems"
 #define ITEMS_DOC        "Document"
 #define ITEMS_EL_NUM     "ElementId"            //id TableElements
 #define ITEMS_MAT_NUM    "MaterialsId"          //id TableMaterials
@@ -65,6 +65,7 @@ public:
     bool selectAtNum(qlonglong num, const QString& tableName, QList<QList<QVariant>>& data);
     qlonglong getRowsCount(const QString& tableName) const;
     qlonglong getLastFolderNumber(const QString& tableName) const;
+    qlonglong getMaxFieldValue(int field, const QString& table);
 private:
     QSqlDatabase m_db;
 private:

@@ -27,6 +27,7 @@ private:
     QAction* editListAct;
     QAction* acceptAct;
     QAction* rejectAct;
+    QAction* historiAct;
 private slots:
     void createItem();
     void createFolder();
@@ -36,8 +37,14 @@ private slots:
     void treeTypeModelSlot(bool);
     void editListActSlot(bool);
     void reserveDataChangedSlot();
+    void acceptActTriggeredSlot();
     void acceptActSlot();
     void rejectActSlot();
+    void historyActClicked();
+signals:
+    void acceptActTr(const QVariant&);
+    void histActTr(qlonglong);
+    void crHistItem(QVector<QVariant>& data);
 };
 
 #endif // CALCULATORMATERIALSDIALOG_H

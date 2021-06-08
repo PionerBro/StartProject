@@ -4,7 +4,8 @@
 #include "calculatortreeitem.h"
 #include "calculatordatabase.h"
 #include "calculatormaterialsdelegate.h"
-
+#include "calculatoracceptdatadialog.h"
+#include "calculatormaterialshistorydialog.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -14,6 +15,7 @@
 #include <QAction>
 
 #include <QDebug>
+
 
 CalculatorMaterialsDialog::CalculatorMaterialsDialog(QWidget* parent, Qt::WindowFlags f):QDialog(parent, f)
 {
@@ -54,8 +56,12 @@ CalculatorMaterialsDialog::CalculatorMaterialsDialog(QWidget* parent, Qt::Window
     toolBar->addAction(acceptAct);
     toolBar->addAction(rejectAct);
     view = new QTableView(this);
+    QToolBar* toolBarBottom = new QToolBar(this);
+    historiAct = new QAction(tr("История"), toolBarBottom);
+    toolBarBottom->addAction(historiAct);
     vbx->addWidget(toolBar);
     vbx->addWidget(view);
+    vbx->addWidget(toolBarBottom);
     QVector<QVariant> header;
     header<<""
            <<"Parent"
@@ -77,12 +83,15 @@ CalculatorMaterialsDialog::CalculatorMaterialsDialog(QWidget* parent, Qt::Window
     connect(selItem, SIGNAL(triggered()), this, SLOT(selectItem()));
     connect(treeTypeModel, SIGNAL(toggled(bool)), this, SLOT(treeTypeModelSlot(bool)));
     connect(editListAct, SIGNAL(toggled(bool)), this, SLOT(editListActSlot(bool)));
-    connect(acceptAct, SIGNAL(triggered()), model, SLOT(reserveDataAccept()));
+    connect(acceptAct, SIGNAL(triggered()), this, SLOT(acceptActTriggeredSlot()));
+    connect(this, SIGNAL(acceptActTr(const QVariant&)), model, SLOT(reserveDataAccept(const QVariant&)));
     connect(rejectAct, SIGNAL(triggered()), model, SLOT(reserveDataReject()));
     connect(view, SIGNAL(doubleClicked(QModelIndex)), model, SLOT(rootItemChanged(QModelIndex)));
     connect(model, SIGNAL(reserveDataChanged()), this, SLOT(reserveDataChangedSlot()));
     connect(model, SIGNAL(reserveDataAccepted()), this, SLOT(acceptActSlot()));
     connect(model, SIGNAL(reserveDataRejected()), this, SLOT(rejectActSlot()));
+
+    connect(historiAct, SIGNAL(triggered()), this, SLOT(historyActClicked()));
 }
 
 void CalculatorMaterialsDialog::viewSettings(){
@@ -102,7 +111,13 @@ void CalculatorMaterialsDialog::createItem(){
     itemData.reserve(6);
     CalculatorMaterialsItem* item = new CalculatorMaterialsItem(itemData, this);
     if(item->exec()){
-        model->createModelItem(itemData);
+        QVariant date;
+        CalculatorAcceptDataDialog* dialog = new CalculatorAcceptDataDialog(date, this);
+        if(dialog->exec()){
+            model->createModelItem(itemData);
+            QVector<QVariant> histData = {0, itemData.value(0), date.toString(), itemData.value(5)};
+            emit crHistItem(histData);
+        }
     }
 }
 
@@ -122,6 +137,14 @@ void CalculatorMaterialsDialog::editItem(){
     QVector<QVariant> itemData = model->getRowData(index);
     CalculatorMaterialsItem* item = new CalculatorMaterialsItem(itemData, this);
     if(item->exec()){
+        if(model->getRowData(index).value(5).toDouble() != itemData.value(5).toDouble()){
+            QVariant date;
+            CalculatorAcceptDataDialog* dialog = new CalculatorAcceptDataDialog(date, this);
+            if(dialog->exec()){
+                QVector<QVariant> histData = {0, itemData.value(0), date.toString(), itemData.value(5)};
+                emit crHistItem(histData);
+            }
+        }
         model->updateModelItem(itemData, index);
     }
 }
@@ -164,7 +187,15 @@ void CalculatorMaterialsDialog::reserveDataChangedSlot(){
     editListAct->setEnabled(false);
 }
 
-void CalculatorMaterialsDialog::acceptActSlot(){
+void CalculatorMaterialsDialog::acceptActTriggeredSlot(){
+    QVariant data;
+    CalculatorAcceptDataDialog* dialog = new CalculatorAcceptDataDialog(data, this);
+    if(dialog->exec()){
+        emit acceptActTr(data);
+    }
+}
+
+void CalculatorMaterialsDialog::acceptActSlot(){  
     acceptAct->setEnabled(false);
     rejectAct->setEnabled(false);
     editListAct->setEnabled(true);
@@ -175,3 +206,12 @@ void CalculatorMaterialsDialog::rejectActSlot(){
     rejectAct->setEnabled(false);
     editListAct->setEnabled(true);
 }
+
+void CalculatorMaterialsDialog::historyActClicked(){
+    QModelIndex index = view->currentIndex();
+    if(!index.isValid())
+        return;
+    qlonglong num = model->getRowData(index).value(0).toLongLong();
+    emit histActTr(num);
+}
+

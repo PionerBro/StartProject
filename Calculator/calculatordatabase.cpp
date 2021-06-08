@@ -55,7 +55,7 @@ bool CalculatorDatabase::createTable(const QString& tableName){
                                                         MATERIALS_PRICE " DOUBLE)"
                   );
     }else if(tableName == TABLE_MATERIALS_PRICES){
-        query.prepare("CREATE TABLE " TABLE_MATERIALS_PRICES " ( "  MATERIALS_PRICES_DOC   " INTEGER, "
+        query.prepare("CREATE TABLE " TABLE_MATERIALS_PRICES " ( "  MATERIALS_PRICES_DOC   " INTEGER , "
                                                      MATERIALS_PRICES_ID    " INTEGER, "
                                                      MATERIALS_PRICES_DATE  " VARCHAR(10), "
                                                      MATERIALS_PRICES_PRICE " DOUBLE)"
@@ -149,8 +149,8 @@ bool CalculatorDatabase::insertIntoTable(const QString& table, const QVector<QVa
         }*/
     }
     query.prepare(prepStm1+prepStm2);
-    for(int i = 0; i < fieldCount-1; ++i){
-        query.bindValue(bindingData.value(i), data.value(i+1));
+    for(int i = 0; i < bindingData.count(); ++i){
+        query.bindValue(bindingData.value(i), data.value(i+startField));
     }
     if(query.exec()){
         return true;
@@ -230,4 +230,18 @@ bool CalculatorDatabase::selectAtNum(qlonglong num, const QString &table, QList<
         return false;
     }
 
+}
+
+qlonglong CalculatorDatabase::getMaxFieldValue(int field, const QString& table){
+    QSqlQuery query(m_db);
+    QString fieldName = m_db.record(table).fieldName(field);
+    if(fieldName.isEmpty())
+        return -1;
+    query.prepare("SELECT max(" + fieldName + ") FROM " + table);
+    if(query.exec()){
+        query.next();
+        return query.value(0).toLongLong();
+    }else{
+        return -1;
+    }
 }

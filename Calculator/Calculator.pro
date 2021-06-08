@@ -9,13 +9,21 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    calccalculationsitem.cpp \
+    calccalculationsitemmodel.cpp \
+    calccalculationsmodelitem.cpp \
     calcitem.cpp \
     calcitem2delegate.cpp \
     calctablewidget.cpp \
+    calculatoracceptdatadialog.cpp \
     calculatorcalculationsdialog.cpp \
+    calculatorcalculationstreemodel.cpp \
     calculatordatabase.cpp \
+    calculatorhistoryitem.cpp \
+    calculatorhistorymodel.cpp \
     calculatormaterialsdelegate.cpp \
     calculatormaterialsdialog.cpp \
+    calculatormaterialshistorydialog.cpp \
     calculatormaterialsitem.cpp \
     calculatormaterialstreemodel.cpp \
     calculatortreeitem.cpp \
@@ -38,13 +46,21 @@ SOURCES += \
     printwidget.cpp
 
 HEADERS += \
+    calccalculationsitem.h \
+    calccalculationsitemmodel.h \
+    calccalculationsmodelitem.h \
     calcitem.h \
     calcitem2delegate.h \
     calctablewidget.h \
+    calculatoracceptdatadialog.h \
     calculatorcalculationsdialog.h \
+    calculatorcalculationstreemodel.h \
     calculatordatabase.h \
+    calculatorhistoryitem.h \
+    calculatorhistorymodel.h \
     calculatormaterialsdelegate.h \
     calculatormaterialsdialog.h \
+    calculatormaterialshistorydialog.h \
     calculatormaterialsitem.h \
     calculatormaterialstreemodel.h \
     calculatortreeitem.h \

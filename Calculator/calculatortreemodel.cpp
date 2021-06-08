@@ -25,7 +25,7 @@ CalculatorTreeModel::~CalculatorTreeModel(){
 
 QVariant CalculatorTreeModel::data(const QModelIndex& index, int role)const{
     if(!index.isValid())
-           return QVariant();
+        return QVariant();
 
     int iColumn = index.column();
 
@@ -78,6 +78,7 @@ QVariant CalculatorTreeModel::data(const QModelIndex& index, int role)const{
 Qt::ItemFlags CalculatorTreeModel::flags(const QModelIndex &index)const{
     if(!index.isValid())
         return Qt::NoItemFlags;
+
     if(editMode && editableCols.value(index.column()))
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 
@@ -148,6 +149,7 @@ int CalculatorTreeModel::columnCount(const QModelIndex &parent)const{
     return m_hHeaderData.count();
 }
 
+//устанавливаем заголовок, при этом сохраняя порядок изменяемых колонок
 void CalculatorTreeModel::sethHeaderData(QVector<QVariant> &headers){
     m_hHeaderData.clear();
     m_hHeaderData<<headers;
@@ -244,11 +246,11 @@ void CalculatorTreeModel::rootItemChanged(QModelIndex index){
     endResetModel();
 }
 
-bool CalculatorTreeModel::createModelItem(const QVector<QVariant> &data){
-    QVector<QVariant> itemData = data;
-    if(createDataBaseItem(m_sqlTable, itemData)){
+bool CalculatorTreeModel::createModelItem(QVector<QVariant> &data){
+    if(createDataBaseItem(m_sqlTable, data)){
         beginResetModel();
-        CalculatorTreeItem* item = new CalculatorTreeItem(itemData, m_curRootItem);
+        //QVector<QVariant> itemData = data;
+        CalculatorTreeItem* item = new CalculatorTreeItem(data, m_curRootItem);
         m_curRootItem->appendChild(item);
         m_curRootItem->sortItem();
         if(item->getItemType() == ItemType::FolderClose){
@@ -273,8 +275,8 @@ bool CalculatorTreeModel::updateModelItem(const QVector<QVariant> &data, const Q
     return false;
 }
 
-bool CalculatorTreeModel::updateModelItems(const QVector<QVector<QVariant>> &data, const QVector<CalculatorTreeItem*> &items){
-    if(updateDataBaseItems(m_sqlTable,data)){
+bool CalculatorTreeModel::updateModelItems(const QVector<QVector<QVariant>> &data, const QVector<CalculatorTreeItem*> &items, const QVariant& date){
+    if(updateDataBaseItems(m_sqlTable,data, date)){
         beginResetModel();
         for(int i = 0; i < items.count(); ++i){
             if(items.value(i))
@@ -337,7 +339,7 @@ void CalculatorTreeModel::reserveDataChange(int row, int column, const QString& 
     emit reserveDataChanged();
 }
 
-void CalculatorTreeModel::reserveDataAccept(){
+void CalculatorTreeModel::reserveDataAccept(const QVariant& date){
     if(editMode){
         beginResetModel();
         reserveAc.fill(false, m_treeElements.count());
@@ -355,7 +357,7 @@ void CalculatorTreeModel::reserveDataAccept(){
             QVector<QVariant> itemData = item->rowData();
             for(int j = 0; j<editCols.count(); ++j){
                 int column = editCols.value(j);
-                if(item->data(column).toString() != reserveData.value(column).value(num)){
+                if(item->data(column) != reserveData.value(column).value(num)){
                     chFlag = true;
                     itemData[column] = reserveData.value(column).value(num);
                 }
@@ -365,7 +367,7 @@ void CalculatorTreeModel::reserveDataAccept(){
                 updateItems<<item;
             }
         }
-        if(updateModelItems(updateData, updateItems)){
+        if(updateModelItems(updateData, updateItems, date)){
             for(int i = 0; i < changedRow.count(); ++i){
                 int num = changedRow.value(i);
                 reserveCh[num] = false;
@@ -410,7 +412,7 @@ bool CalculatorTreeModel::updateDataBaseItem(const QString& tableName, const QVe
     return false;
 }
 
-bool CalculatorTreeModel::updateDataBaseItems(const QString& tableName, const QVector<QVector<QVariant>>& data){
+bool CalculatorTreeModel::updateDataBaseItems(const QString& tableName, const QVector<QVector<QVariant>>& data, const QVariant&){
     for(int i = 0; i < data.count(); ++i){
         if(!m_db->updateTableItem(tableName, data.value(i)))
             return false;

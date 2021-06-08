@@ -1,10 +1,10 @@
 #include "calculatorcalculationsdialog.h"
 #include "calculatormaterialsitem.h"
-#include "calculatormaterialstreemodel.h"
+#include "calculatorcalculationstreemodel.h"
 #include "calculatortreeitem.h"
 #include "calculatordatabase.h"
 #include "calculatormaterialsdelegate.h"
-
+#include "calccalculationsitem.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -55,7 +55,7 @@ CalculatorCalculationsDialog::CalculatorCalculationsDialog(QWidget* parent, Qt::
            <<"Цена"
            <<"Выход"
             <<"Порция";
-    model = new CalculatorMaterialsTreeModel(TABLE_ELEMENTS_TREE, headers, this);
+    model = new CalculatorCalculationsTreeModel(TABLE_ELEMENTS_TREE, headers, this);
     model->setupModelData();
     model->setSortCol(3);
     view->setModel(model);
@@ -84,7 +84,7 @@ void CalculatorCalculationsDialog::viewSettings(){
 void CalculatorCalculationsDialog::createItem(){
     QVector<QVariant> itemData = {0,model->currentRoot()->data(FieldName::FolderId),0};
     itemData.reserve(7);
-    CalculatorMaterialsItem* item = new CalculatorMaterialsItem(itemData, this);
+    CalcCalculationsItem* item = new CalcCalculationsItem(this);
     if(item->exec()){
         model->createModelItem(itemData);
     }

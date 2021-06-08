@@ -18,6 +18,7 @@
 #include "calculatormaterialsdialog.h"
 #include "calcultatorunitstablemodel.h"
 #include "calculatorcalculationsdialog.h"
+#include "calculatormaterialshistorydialog.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -33,6 +34,7 @@ DirectoryWidget* dirWidget;
 CalculatorMaterialsDialog* calcMaterialsWidget;
 CalcultatorUnitsTableModel* unitsModel;
 CalculatorCalculationsDialog* calcCalcsDialog;
+CalculatorMaterialsHistoryDialog* calcMatHistDialog;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -48,10 +50,13 @@ MainWindow::MainWindow(QWidget *parent)
         exit(-1);
     calcWidget = new CalcWidget();
     dirWidget  = new DirectoryWidget();
+    calcMatHistDialog = new CalculatorMaterialsHistoryDialog();
     calcMaterialsWidget = new CalculatorMaterialsDialog();
+    qDebug()<<"sdd";
     unitsModel = new CalcultatorUnitsTableModel(TABLE_UNITS, {tr(""),tr("Наименование")}, this);
     unitsModel->setupModelData();
     calcCalcsDialog = new CalculatorCalculationsDialog();
+
     //calcWidget->setStyleSheet("background-color: #1f4037; color: #ffff4d");
     //dirWidget->setStyleSheet("background-color: #1f4037; color: #ffff4d");
     QMenu* menu = new QMenu(tr("Журналы"), this);
@@ -71,7 +76,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(actDirItemsJournal, SIGNAL(triggered()), dirWidget, SLOT(show()));
     connect(actDirItemsLists, SIGNAL(triggered()), calcMaterialsWidget, SLOT(show()));
     connect(actCalcItemsLists, SIGNAL(triggered()), calcCalcsDialog, SLOT(show()));
-
+    connect(calcMaterialsWidget, SIGNAL(histActTr(qlonglong)), calcMatHistDialog, SLOT(showAtNum(qlonglong)));
+    connect(calcMaterialsWidget, SIGNAL(crHistItem(QVector<QVariant>&)), calcMatHistDialog, SLOT(createItem(QVector<QVariant>&)));
 }
 
 
@@ -81,6 +87,7 @@ MainWindow::~MainWindow()
     delete dirWidget;
     delete calcMaterialsWidget;
     delete calcCalcsDialog;
+    delete calcMatHistDialog;
 }
 
 

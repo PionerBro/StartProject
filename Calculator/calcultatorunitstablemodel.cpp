@@ -18,6 +18,7 @@ QVariant CalcultatorUnitsTableModel::data(const QModelIndex &index, int role) co
     case Qt::DecorationRole:
         if(!column)
             return QIcon("../Calculator/blue1.png").pixmap(QSize(25,25));;
+        return QVariant();
     case Qt::DisplayRole:
         if(!column)
             return QVariant();

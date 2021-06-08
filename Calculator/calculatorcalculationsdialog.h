@@ -4,7 +4,7 @@
 #include <QDialog>
 
 class QTableView;
-class CalculatorMaterialsTreeModel;
+class CalculatorCalculationsTreeModel;
 
 class CalculatorCalculationsDialog : public QDialog
 {
@@ -13,7 +13,7 @@ public:
     CalculatorCalculationsDialog(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 private:
     QTableView* view;
-    CalculatorMaterialsTreeModel* model;
+    CalculatorCalculationsTreeModel* model;
 
     void viewSettings();
     QAction* newAct;
