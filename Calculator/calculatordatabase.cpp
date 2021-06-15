@@ -7,6 +7,7 @@
 #include <QVector>
 #include <QSqlRecord>
 #include <QSqlField>
+#include <QSqlIndex>
 
 #include <QDebug>
 
@@ -74,6 +75,7 @@ bool CalculatorDatabase::createTable(const QString& tableName){
                                                         ITEMS_EL_NUM   " INTEGER, "
                                                         ITEMS_MAT_NUM " INTEGER, "
                                                         ITEMS_MAT_NAME " VARCHAR(50), "
+                                                        ITEMS_MAT_UNIT " VARCHAR(20), "
                                                         ITEMS_COUNT " DOUBLE, "
                                                         ITEMS_PRICE " DOUBLE)"
                   );
@@ -244,4 +246,16 @@ qlonglong CalculatorDatabase::getMaxFieldValue(int field, const QString& table){
     }else{
         return -1;
     }
+}
+
+bool CalculatorDatabase::deleteFromTable(qlonglong num, const QString &tableName){
+    if(num < 1)
+        return false;
+    QSqlQuery query(m_db);
+    query.prepare("DELETE FROM " + tableName + " WHERE " ITEMS_EL_NUM " = :Num");
+    query.bindValue(":Num", num);
+    if(!query.exec()){
+        return false;
+    }
+    return true;
 }

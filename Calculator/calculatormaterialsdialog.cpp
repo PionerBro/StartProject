@@ -94,6 +94,10 @@ CalculatorMaterialsDialog::CalculatorMaterialsDialog(QWidget* parent, Qt::Window
     connect(historiAct, SIGNAL(triggered()), this, SLOT(historyActClicked()));
 }
 
+CalculatorMaterialsTreeModel* CalculatorMaterialsDialog::getModel(){
+    return model;
+}
+
 void CalculatorMaterialsDialog::viewSettings(){
     view->setSelectionMode(QAbstractItemView::SingleSelection);
     view->setColumnHidden(1,true);

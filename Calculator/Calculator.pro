@@ -9,8 +9,14 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Database/database.cpp \
+    Database/treeitem.cpp \
+    Database/treemodel.cpp \
+    MaterialsTree/materialstreemodel.cpp \
     calccalculationsitem.cpp \
     calccalculationsitemmodel.cpp \
+    calccalculationsitemmodeldelegate.cpp \
+    calccalculationsitemmodeldelegatewgt.cpp \
     calccalculationsmodelitem.cpp \
     calcitem.cpp \
     calcitem2delegate.cpp \
@@ -46,8 +52,14 @@ SOURCES += \
     printwidget.cpp
 
 HEADERS += \
+    Database/database.h \
+    Database/treeitem.h \
+    Database/treemodel.h \
+    MaterialsTree/materialstreemodel.h \
     calccalculationsitem.h \
     calccalculationsitemmodel.h \
+    calccalculationsitemmodeldelegate.h \
+    calccalculationsitemmodeldelegatewgt.h \
     calccalculationsmodelitem.h \
     calcitem.h \
     calcitem2delegate.h \

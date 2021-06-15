@@ -35,6 +35,7 @@
 #define ITEMS_EL_NUM     "ElementId"            //id TableElements
 #define ITEMS_MAT_NUM    "MaterialsId"          //id TableMaterials
 #define ITEMS_MAT_NAME   "MaterialsName"
+#define ITEMS_MAT_UNIT   "MaterialsUnit"
 #define ITEMS_COUNT      "Count"
 #define ITEMS_PRICE      "Price"                //price TableMaterialsPrices
 
@@ -63,6 +64,7 @@ public:
     bool insertIntoTable(const QString& tableName, const QVector<QVariant>& data);
     bool updateTableItem(const QString& tableName, const QVector<QVariant>& data);
     bool selectAtNum(qlonglong num, const QString& tableName, QList<QList<QVariant>>& data);
+    bool deleteFromTable(qlonglong num, const QString& tableName);
     qlonglong getRowsCount(const QString& tableName) const;
     qlonglong getLastFolderNumber(const QString& tableName) const;
     qlonglong getMaxFieldValue(int field, const QString& table);

@@ -36,7 +36,6 @@ QVariant CalculatorCalculationsTreeModel::data(const QModelIndex &index, int rol
 
 }
 
-/*
 bool CalculatorCalculationsTreeModel::createDataBaseItem(const QString& tableName, QVector<QVariant>& data){
     if(data.value(FieldName::FolderId).toInt()){
         qlonglong fNum = m_db->getLastFolderNumber(tableName);
@@ -55,6 +54,7 @@ bool CalculatorCalculationsTreeModel::createDataBaseItem(const QString& tableNam
     return true;
 }
 
+/*
 bool CalculatorCalculationsTreeModel::updateDataBaseItems(const QString& tableName, const QVector<QVector<QVariant>> &data, const QVariant& date){
     QVector<QVector<QVariant>> vect;
     for(int i = 0; i < data.count(); ++i){

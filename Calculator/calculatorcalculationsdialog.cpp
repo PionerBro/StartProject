@@ -83,16 +83,19 @@ void CalculatorCalculationsDialog::viewSettings(){
 
 void CalculatorCalculationsDialog::createItem(){
     QVector<QVariant> itemData = {0,model->currentRoot()->data(FieldName::FolderId),0};
-    itemData.reserve(7);
-    CalcCalculationsItem* item = new CalcCalculationsItem(this);
+    itemData.resize(7);
+    CalcCalculationsItem* item = new CalcCalculationsItem(itemData, this);
+    item->setWindowModality(Qt::WindowModal);
+    item->setNum(itemData.value(0).toLongLong());
     if(item->exec()){
-        model->createModelItem(itemData);
+        qDebug()<<itemData;
+        //model->createModelItem(itemData);
     }
 }
 
 void CalculatorCalculationsDialog::createFolder(){
     QVector<QVariant> itemData = {0,model->currentRoot()->data(FieldName::FolderId),1};
-    itemData.reserve(7);
+    itemData.resize(7);
     CalculatorMaterialsItem* item = new CalculatorMaterialsItem(itemData, this);
     if(item->exec()){
         model->createModelItem(itemData);
@@ -104,7 +107,11 @@ void CalculatorCalculationsDialog::editItem(){
     if(!index.isValid())
         return;
     QVector<QVariant> itemData = model->getRowData(index);
-    CalculatorMaterialsItem* item = new CalculatorMaterialsItem(itemData, this);
+    CalcCalculationsItem* item = new CalcCalculationsItem(itemData, this);
+    item->setWindowModality(Qt::WindowModal);
+    item->setNum(itemData.value(0).toLongLong());
+    item->slotSumDataChanged();
+    qDebug()<<itemData.value(0).toLongLong();
     if(item->exec()){
         model->updateModelItem(itemData, index);
     }

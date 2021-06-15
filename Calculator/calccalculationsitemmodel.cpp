@@ -2,14 +2,17 @@
 #include "calccalculationsmodelitem.h"
 #include "calculatordatabase.h"
 
+#include <QDebug>
+
 extern CalculatorDatabase g_db;
 
-CalcCalculationsItemModel::CalcCalculationsItemModel(const QVector<const QString>& tables, const QVector<QVariant>& headers, QObject* parent) : QAbstractItemModel(parent)
+CalcCalculationsItemModel::CalcCalculationsItemModel(const QVector<QString>& tables, const QVector<QVariant>& headers, QObject* parent) : QAbstractItemModel(parent)
 {
     m_db = &g_db;
     m_sqlMainTable = tables.value(0);
     m_sqlTablePrices = tables.value(1);
     m_hHeaders = headers;
+    m_editableCols.fill(false, m_hHeaders.count());
     setupModel();
 }
 
@@ -33,6 +36,8 @@ QVariant CalcCalculationsItemModel::data(const QModelIndex& index, int role)cons
 Qt::ItemFlags CalcCalculationsItemModel::flags(const QModelIndex &index)const{
     if(!index.isValid())
         return Qt::NoItemFlags;
+    if(m_editableCols.value(index.column()))
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
@@ -40,18 +45,18 @@ QModelIndex CalcCalculationsItemModel::index(int row, int column, const QModelIn
     if(!hasIndex(row,column,parent))
         return QModelIndex();
 
-    if(!parent.isValid()){
+    CalcCalculationsModelItem* item;
+    if(!parent.isValid())
+        item = m_root;
+    else
+        item = static_cast<CalcCalculationsModelItem*>(parent.internalPointer());
+    CalcCalculationsModelItem* child = item->child(row);
+    if(child)
+        return createIndex(row, column, child);
+    else
         return QModelIndex();
-    }else{
-         CalcCalculationsModelItem* item = static_cast<CalcCalculationsModelItem*>(parent.internalPointer())->child(row);
-         if(item){
-            QModelIndex itemIndex = createIndex(row, column, item);
-            return itemIndex;
-         }else{
-             return QModelIndex();
-         }
-    }
 }
+
 
 QVariant CalcCalculationsItemModel::headerData(int section, Qt::Orientation orientation, int role) const{
     if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
@@ -90,6 +95,29 @@ QVector<QVariant> CalcCalculationsItemModel::getRowData(const QModelIndex& index
     return static_cast<CalcCalculationsModelItem*>(index.internalPointer())->rowData();
 }
 
+void CalcCalculationsItemModel::setColEditable(int column, bool value){
+    beginResetModel();
+    if(m_editableCols.count() > column)
+        m_editableCols[column] = value;
+    endResetModel();
+}
+
+bool CalcCalculationsItemModel::setRoot(int num){
+    if(!m_rootItems.contains(num))
+        return false;
+    m_root->setRowData({num});
+    if(m_root->childCount()){
+        for(int i = 0; i < m_root->childCount(); ++i){
+            delete m_root->child(i);
+        }
+    }
+    CalcCalculationsModelItem* tmp = m_rootItems.value(num);
+    for(int i = 0; i < tmp->childCount(); ++i){
+        CalcCalculationsModelItem* item = new CalcCalculationsModelItem(tmp->child(i)->rowData(), m_root);
+        m_root->appendChild(item);
+    }
+    return true;
+}
 
 void CalcCalculationsItemModel::setupModel(){
     if(!m_rootItems.isEmpty()){
@@ -98,12 +126,7 @@ void CalcCalculationsItemModel::setupModel(){
     }
     CalcCalculationsModelItem* item = new CalcCalculationsModelItem({0});
     m_rootItems.insert(0, item);
-    QVector<QVariant> vect;
-    vect.fill(QVariant(), m_hHeaders.count());
-    item = new CalcCalculationsModelItem(vect, m_rootItems.value(0));
-    m_rootItems.value(0)->appendChild(item);
     m_root = m_rootItems.value(0);
-
     QVector<QVector<QVariant>> data;
     if(selectItems(data)){
         for(int i = 0; i < data.count(); ++i){
@@ -116,12 +139,56 @@ void CalcCalculationsItemModel::setupModel(){
             m_rootItems.value(itemNum)->appendChild(item);
         }
     }
-    QList<int> keys = m_rootItems.keys();
-    for(int i = 0; i < keys.count(); ++i){
-        m_rootItems.value(keys.value(i))->sortItem();
-    }
+    //QList<int> keys = m_rootItems.keys();
+    //for(int i = 0; i < keys.count(); ++i){
+      //  m_rootItems.value(keys.value(i))->sortItem();
+    //}
+    qDebug()<<"s";
 }
 
-bool CalcCalculationsItemModel::selectItems(QVector<QVector<QVariant>>){
+bool CalcCalculationsItemModel::selectItems(QVector<QVector<QVariant>>& data){
+    QVector<QVector<QVariant>> fdata;
+    if(m_db->select(m_sqlMainTable, fdata)){
+        for(int i = 0; i < fdata.count(); ++i){
+            QVector<QVariant> vect;
+            vect<<fdata.value(i).value(1)<<fdata.value(i).value(3)<<fdata.value(i).value(4)<<fdata.value(i).value(5)<<fdata.value(i).value(6)<<QString::number(fdata.value(i).value(5).toDouble()*fdata.value(i).value(6).toDouble(), 'f', 2);
+            data<<vect;
+        }
+        qDebug()<<data;
+        return true;
+    }
+    return false;
+}
+
+void CalcCalculationsItemModel::addNewRow(){
+    beginResetModel();
+    QVector<QVariant> data;
+    data.fill(QVariant(), columnCount());
+    CalcCalculationsModelItem* item = new CalcCalculationsModelItem(data, m_root);
+    m_root->appendChild(item);
+    endResetModel();
+}
+
+CalcCalculationsModelItem* CalcCalculationsItemModel::rootItem(){
+    return m_root;
+}
+
+bool CalcCalculationsItemModel::createModelItem(){
+    qlonglong iNum = m_root->data(0).toLongLong();
+    if(iNum){
+        //if (m_db->deleteFromTable(iNum, m_sqlMainTable))
+           // return false;
+        CalcCalculationsModelItem* item = m_rootItems.value(iNum);
+        for(int i = 0; i < item->childCount(); ++i){
+            //m_db->getIdFromName();
+
+            qDebug()<<item->child(i)->rowData();
+            delete (item->child(i));
+        }
+        for(int i = 0; i < m_root->childCount(); ++i){
+            CalcCalculationsModelItem* tmp = new CalcCalculationsModelItem(m_root->child(i)->rowData(), item);
+            item->appendChild(tmp);
+        }
+    }
     return true;
 }

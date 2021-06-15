@@ -13,6 +13,7 @@ class CalculatorMaterialsDialog : public QDialog
 public:
     CalculatorMaterialsDialog(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
+    CalculatorMaterialsTreeModel* getModel();
 private:
     QTableView* view;
     CalculatorMaterialsTreeModel* model;

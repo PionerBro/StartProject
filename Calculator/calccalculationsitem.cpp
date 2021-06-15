@@ -1,6 +1,9 @@
 #include "calccalculationsitem.h"
 #include "mydoublevalidator.h"
 #include "calcitem2delegate.h"
+#include "calccalculationsitemmodel.h"
+#include "calccalculationsitemmodeldelegate.h"
+#include "calculatordatabase.h"
 
 #include <QBoxLayout>
 #include <QLabel>
@@ -11,7 +14,9 @@
 #include <QTableView>
 #include <QHeaderView>
 
-CalcCalculationsItem::CalcCalculationsItem(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f)
+#include <QDebug>
+
+CalcCalculationsItem::CalcCalculationsItem(QVector<QVariant>& data, QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f), m_data(data)
 {
     setWindowFlag(Qt::WindowMaximizeButtonHint,true);
     setWindowFlag(Qt::WindowMinimizeButtonHint,true);
@@ -42,7 +47,7 @@ CalcCalculationsItem::CalcCalculationsItem(QWidget* parent, Qt::WindowFlags f) :
     hbx21->addWidget(portionsLabel,0,Qt::AlignLeft);
     hbx21->addWidget(outputEdit,0,Qt::AlignLeft);
     hbx21->addSpacing(100);
-    connect(outputEdit, SIGNAL(textChanged(QString)), this, SLOT(priceSlot()));
+    connect(outputEdit, SIGNAL(textChanged(QString)), this, SLOT(slotPriceChanged()));
 
     QHBoxLayout* hbx22 = new QHBoxLayout;
     hbx2->addLayout(hbx22);
@@ -70,22 +75,33 @@ CalcCalculationsItem::CalcCalculationsItem(QWidget* parent, Qt::WindowFlags f) :
     sumLabel = new QLabel("",this);
     hbx32->addWidget(sumLabel, 0, Qt::AlignRight);
     table = new QTableView(this);
-    QStringList headers;
-    headers<<tr("Наименование")
+    QVector<QVariant> headers;
+    headers<<tr("id")
+            <<tr("Наименование")
              <<tr("Ед.изм")
              <<tr("Кол-во")
              <<tr("Цена")
              <<tr("Сумма");
-    table->setColumnWidth(0,300);
+    QVector<QString> vect;
+    vect<<TABLE_ITEMS;
+    model = new CalcCalculationsItemModel(vect, headers, this);
+    model->setColEditable(1);
+    model->setColEditable(3);
+    table->setModel(model);
+    qDebug()<<"sd";
+    table->setColumnWidth(1,300);
     table->horizontalHeader()->setStretchLastSection(true);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     CalcItem2Delegate* delegate = new CalcItem2Delegate(table);
-    table->setItemDelegateForColumn(2, delegate);
-    table->setItemDelegateForColumn(3, delegate);
+    CalcCalculationsItemModelDelegate* del = new CalcCalculationsItemModelDelegate(table);
+    table->setItemDelegateForColumn(3, del);
+    table->setItemDelegateForColumn(1, del);
+    connect(del, SIGNAL(sumDataChanged()), this, SLOT(slotSumDataChanged()));
     table->setItemDelegateForColumn(4, delegate);
     table->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::DoubleClicked);
-    connect(btnAddRow, SIGNAL(clicked()), this, SLOT(btnAddRowClicked()));
-    connect(table, SIGNAL(cellChanged(int,int)), this, SLOT(dataChanged(int,int)));
+    table->setColumnHidden(0, true);
+    connect(btnAddRow, SIGNAL(clicked()), model, SLOT(addNewRow()));
+    //connect(table, SIGNAL(cellChanged(int,int)), this, SLOT(dataChanged(int,int)));
     vbx->addWidget(table);
     QHBoxLayout* hbxSize = new QHBoxLayout;
     vbx->addLayout(hbxSize);
@@ -98,7 +114,7 @@ CalcCalculationsItem::CalcCalculationsItem(QWidget* parent, Qt::WindowFlags f) :
     hbxSize->addWidget(sizeLabel, Qt::AlignRight);
     hbxSize->setAlignment(sizeLabel, Qt::AlignRight);
     hbxSize->addWidget(portionEdit, Qt::AlignRight);
-    connect(portionEdit, SIGNAL(textChanged(QString)), this, SLOT(priceSlot()));
+    connect(portionEdit, SIGNAL(textChanged(QString)), this, SLOT(slotPriceChanged()));
     QLabel* textPriceLabel = new QLabel(tr("Цена: "),this);
     priceLabel = new QLabel("0.00", this);
     priceLabel->setMinimumSize(60,20);
@@ -133,4 +149,41 @@ CalcCalculationsItem::CalcCalculationsItem(QWidget* parent, Qt::WindowFlags f) :
     hbxBtn3->addWidget(btnPrint, 0, Qt::AlignRight);
     btnPrint->setFocusPolicy(Qt::NoFocus);
     connect(btnPrint, SIGNAL(clicked()), this, SLOT(printSlot()));
+}
+
+void CalcCalculationsItem::slotSumDataChanged(){
+    double sum = 0;
+    for(int i = 0; i < model->rowCount(); ++i){
+        sum += model->data(model->index(i, 5, QModelIndex()), Qt::DisplayRole).toDouble();
+    }
+    sumLabel->setText(QString::number(sum,'f',2));
+    slotPriceChanged();
+}
+
+void CalcCalculationsItem::slotPriceChanged(){
+    double output = outputEdit->text().toDouble();
+    double portion = portionEdit->text().toDouble();
+    double sum = sumLabel->text().toDouble();
+    double price = sum*portion/output/1000;
+    if(output){
+        priceLabel->setText(QString::number(price, 'f', 2));
+    }else{
+        priceLabel->setText("0.00");
+    }
+}
+
+void CalcCalculationsItem::slotOkClicked(){
+    if(m_data.count()!=7){
+        reject();
+    }
+    m_data[3] = nameEdit->text();
+    m_data[4] = priceLabel->text();
+    m_data[5] = outputEdit->text();
+    m_data[6] = portionEdit->text();
+    model->createModelItem();
+    accept();
+}
+
+void CalcCalculationsItem::setNum(qlonglong num){
+    model->setRoot(num);
 }

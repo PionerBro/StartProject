@@ -16,6 +16,7 @@ public:
     int columnCount()const;
     int childCount()const;
     void appendChild(CalcCalculationsModelItem* child);
+    void setData(int column, const QVariant& data);
     void setRowData(const QVector<QVariant> &data);
     QVector<QVariant> rowData() const;
     void sortItem();

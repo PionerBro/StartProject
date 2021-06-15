@@ -39,6 +39,12 @@ void CalcCalculationsModelItem::appendChild(CalcCalculationsModelItem* child){
     m_childItems.append(child);
 }
 
+void CalcCalculationsModelItem::setData(int column, const QVariant &data){
+    if(columnCount() > column)
+        m_itemData[column] = data;
+
+}
+
 void CalcCalculationsModelItem::setRowData(const QVector<QVariant> &data){
     m_itemData.clear();
     m_itemData<<data;

@@ -19,6 +19,7 @@
 #include "calcultatorunitstablemodel.h"
 #include "calculatorcalculationsdialog.h"
 #include "calculatormaterialshistorydialog.h"
+#include "Database/database.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -28,6 +29,8 @@
 
 MyDataBase db;
 CalculatorDatabase g_db;
+
+//Database gdb = QSqlDatabase::addDatabase("QSQLITE", "sdss");
 
 CalcWidget* calcWidget;
 DirectoryWidget* dirWidget;
@@ -44,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
     str = QString::number(d,'f', 2);
     qDebug()<<str;
     //setStyleSheet("background-color: #1f4037; color: #ffff4d");
+    //if(!gdb.openDatabase())
+    //    exit(-1);
     if(!db.createConnection())
         exit(-1);
     if(!g_db.createConnection())

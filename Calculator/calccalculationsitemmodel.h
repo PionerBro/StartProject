@@ -11,7 +11,7 @@ class CalcCalculationsItemModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    CalcCalculationsItemModel(const QVector<const QString>& tables, const QVector<QVariant>& headers = {}, QObject* parent = nullptr);
+    CalcCalculationsItemModel(const QVector<QString>& tables, const QVector<QVariant>& headers = {}, QObject* parent = nullptr);
     ~CalcCalculationsItemModel();
 
     QVariant data(const QModelIndex& index, int role)const override;
@@ -22,16 +22,23 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex())const override;
     int columnCount(const QModelIndex &parent = QModelIndex())const override;
     QVector<QVariant> getRowData(const QModelIndex& index) const;
+    void setColEditable(int column, bool value = true);
+    bool setRoot(int num);
+    CalcCalculationsModelItem* rootItem();
+    bool createModelItem();
 private:
     void setupModel();
-    bool selectItems(QVector<QVector<QVariant>>);
+    bool selectItems(QVector<QVector<QVariant>>&);
 private:
     QMap<int, CalcCalculationsModelItem*> m_rootItems;
-    CalcCalculationsModelItem* m_root;
+    QVector<bool> m_editableCols;
+    CalcCalculationsModelItem* m_root = nullptr;
     CalculatorDatabase* m_db;
     QString m_sqlMainTable;
     QString m_sqlTablePrices;
     QVector<QVariant> m_hHeaders;
+private slots:
+    void addNewRow();
 };
 
 #endif // CALCCALCULATIONSITEMMODEL_H

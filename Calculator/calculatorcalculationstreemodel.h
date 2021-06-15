@@ -10,6 +10,7 @@ public:
     CalculatorCalculationsTreeModel(const QString& sqlTable, const QVector<QVariant>& headers = {}, QObject* parent = 0);
 
     QVariant data(const QModelIndex& index, int role)const override;
+    bool createDataBaseItem(const QString& tableName, QVector<QVariant>& data) override;
 };
 
 #endif // CALCULATORCALCULATIONSTREEMODEL_H
